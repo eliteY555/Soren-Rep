@@ -1,0 +1,54 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: tailai-file-service
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+# 阿里云OSS配置
+aliyun:
+  oss:
+    endpoint: https://oss-cn-beijing.aliyuncs.com
+    accessKeyId: 
+    accessKeySecret: 
+    bucketName: tailai-1
+    # 路径配置（可选）
+    path:
+      # 默认是否使用日期子目录（yyyy/MM/dd）
+      use-date-subdir: true
+      # 默认是否使用UUID文件名
+      use-uuid-filename: true
+      # 默认根目录前缀
+      default-prefix: files
+
+# Knife4j配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+  openapi:
+    title: 文件服务API文档
+    description: 泰来云 - 文件服务接口（OSS上传下载、PDF生成）
+    version: 1.0.0
+    concat: 泰来云开发团队
+    url: https://tailai.com
+    email: dev@tailai.com
+    group:
+      default:
+        group-name: 文件管理
+        api-rule: package
+        api-rule-resources:
+          - com.tailai.file.controller
+
+# 日志配置
+logging:
+  level:
+    com.tailai: debug
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n'
+

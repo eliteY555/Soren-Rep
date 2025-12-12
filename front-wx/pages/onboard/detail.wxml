@@ -1,0 +1,83 @@
+<!--申请详情页面-->
+<view class="container">
+  <!-- 申请状态卡片 -->
+  <view class="status-card {{statusClass}}">
+    <view class="status-header">
+      <text class="status-icon">{{statusIcon}}</text>
+      <view>
+        <view class="status-title">{{statusTitle}}</view>
+        <view class="status-desc">{{statusDesc}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 申请信息 -->
+  <view class="detail-card">
+    <view class="card-title">申请信息</view>
+    <view class="detail-row">
+      <text class="detail-label">📋 申请编号</text>
+      <text class="detail-value">{{application.applicationNo}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">👤 申请人</text>
+      <text class="detail-value">{{application.employeeName}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">💼 应聘岗位</text>
+      <text class="detail-value">{{application.position}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">📅 期望入职日期</text>
+      <text class="detail-value">{{application.startDate}}</text>
+    </view>
+    <view class="detail-row">
+      <text class="detail-label">🕐 提交时间</text>
+      <text class="detail-value">{{application.createTime}}</text>
+    </view>
+  </view>
+
+  <!-- 审批流程 -->
+  <view class="detail-card" wx:if="{{showTimeline}}">
+    <view class="card-title">审批流程</view>
+    <view class="timeline">
+      <view class="timeline-item">
+        <view class="timeline-dot success"></view>
+        <view class="timeline-content success">
+          <view class="timeline-title">✅ 员工提交申请</view>
+          <view class="timeline-desc">{{application.employeeName}} · {{application.createTime}}</view>
+        </view>
+      </view>
+      <view class="timeline-item" wx:if="{{application.status !== 'PENDING'}}">
+        <view class="timeline-dot success"></view>
+        <view class="timeline-content success">
+          <view class="timeline-title">✅ 员工完成签字</view>
+          <view class="timeline-desc">已完成</view>
+        </view>
+      </view>
+      <view class="timeline-item" wx:if="{{application.status === 'PENDING_APPROVAL'}}">
+        <view class="timeline-dot pending"></view>
+        <view class="timeline-content pending">
+          <view class="timeline-title">🔄 待领导审批并签字</view>
+          <view class="timeline-desc">当前节点 · 等待处理中</view>
+        </view>
+      </view>
+      <view class="timeline-item" wx:if="{{application.status === 'APPROVED'}}">
+        <view class="timeline-dot success"></view>
+        <view class="timeline-content success">
+          <view class="timeline-title">✅ 领导审批通过</view>
+          <view class="timeline-desc">{{application.approverName}} · {{application.approvalTime}}</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="info-box" wx:if="{{application.status === 'PENDING_APPROVAL'}}">
+    💡 您的申请正在审批中，领导审批并签字后合同将立即生效。审批结果将通过微信通知您。
+  </view>
+
+  <view class="success-box" wx:if="{{application.status === 'APPROVED'}}">
+    🎉 恭喜！您的入职申请已通过，合同已生效，欢迎加入公司！
+  </view>
+</view>
+

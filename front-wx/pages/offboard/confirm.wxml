@@ -1,0 +1,58 @@
+<!--离职确认页面-->
+<view class="container">
+  <!-- 进度提示 -->
+  <view class="step-tip">
+    <view class="step-header">
+      <view class="step-icon">📝</view>
+      <text class="step-title">第2步：确认离职信息</text>
+    </view>
+    <text class="step-desc">请确认离职信息，确认无误后进行电子签名</text>
+  </view>
+
+  <!-- 离职信息 -->
+  <view class="info-card">
+    <view class="card-title">离职信息</view>
+    
+    <view class="info-row">
+      <text class="info-label">👤 员工姓名</text>
+      <text class="info-value">{{offboardData.employeeName}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="info-label">💼 当前岗位</text>
+      <text class="info-value">{{offboardData.position}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="info-label">📅 离职日期</text>
+      <text class="info-value highlight">{{offboardData.offboardDate}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="info-label">📝 离职原因</text>
+      <text class="info-value">{{offboardData.reason}}</text>
+    </view>
+    
+    <view class="info-row" wx:if="{{offboardData.reasonDetail}}">
+      <text class="info-label">💬 详细说明</text>
+      <text class="info-value">{{offboardData.reasonDetail}}</text>
+    </view>
+
+    <view class="info-row" wx:if="{{offboardData.phone}}">
+      <text class="info-label">📞 联系电话</text>
+      <text class="info-value">{{offboardData.phone}}</text>
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="info-box">
+    💡 确认离职信息无误后，请进行电子签名。签名后将提交审批，领导审批后离职申请即可生效。
+  </view>
+</view>
+
+<!-- 底部操作栏 -->
+<view class="bottom-actions">
+  <button class="btn-back" bindtap="goBack">返回修改</button>
+  <button class="btn-next" bindtap="goToSign">下一步</button>
+</view>
+

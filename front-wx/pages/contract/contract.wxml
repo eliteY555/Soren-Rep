@@ -1,0 +1,171 @@
+<!--pages/contract/contract.wxml-->
+<view class="contract-page">
+  <!-- 标签栏 -->
+  <view class="tabs">
+    <view class="tab-item {{activeTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+      <view class="tab-text">待签署</view>
+    </view>
+    <view class="tab-item {{activeTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+      <view class="tab-text">已签署</view>
+    </view>
+  </view>
+
+  <!-- 合同列表 -->
+  <view class="contract-list">
+    <view wx:if="{{loading}}" class="loading">
+      <view class="loading-text">加载中...</view>
+    </view>
+
+    <view wx:elif="{{contractList.length === 0}}" class="empty">
+      <view class="empty-icon">📄</view>
+      <view class="empty-text">暂无合同</view>
+    </view>
+
+    <view wx:else>
+      <view class="contract-item" wx:for="{{contractList}}" wx:key="id" bindtap="viewContract" data-id="{{item.id}}">
+        <view class="contract-header">
+          <view class="contract-no">{{item.contractNo}}</view>
+          <view class="contract-status {{getStatusClass(item.status)}}">
+            {{getStatusText(item.status)}}
+          </view>
+        </view>
+        
+        <view class="contract-info">
+          <view class="info-row">
+            <view class="info-label">员工姓名：</view>
+            <view class="info-value">{{item.employeeName}}</view>
+          </view>
+          <view class="info-row">
+            <view class="info-label">岗位：</view>
+            <view class="info-value">{{item.position}}</view>
+          </view>
+          <view class="info-row">
+            <view class="info-label">基本工资：</view>
+            <view class="info-value">¥{{item.baseSalary}}</view>
+          </view>
+          <view class="info-row">
+            <view class="info-label">合同期限：</view>
+            <view class="info-value">{{item.startDate}} 至 {{item.endDate}}</view>
+          </view>
+        </view>
+        
+        <view class="contract-footer">
+          <view class="create-time">创建时间：{{formatDate(item.createdAt)}}</view>
+          <view class="arrow">›</view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 合同详情弹窗 -->
+  <view class="modal" wx:if="{{showDetailModal}}">
+    <view class="modal-mask" catchtouchmove="preventTouchMove" bindtap="closeDetailModal"></view>
+    <view class="modal-content" catchtouchmove="preventTouchMove">
+      <view class="modal-header">
+        <view class="modal-title">合同详情</view>
+        <view class="modal-close" bindtap="closeDetailModal">✕</view>
+      </view>
+
+      <view class="modal-body" wx:if="{{currentContract}}">
+        <view class="detail-section">
+          <view class="section-title">基本信息</view>
+          <view class="detail-row">
+            <view class="detail-label">合同编号：</view>
+            <view class="detail-value">{{currentContract.contractNo}}</view>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">员工姓名：</view>
+            <view class="detail-value">{{currentContract.employeeName}}</view>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">岗位：</view>
+            <view class="detail-value">{{currentContract.position}}</view>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">基本工资：</view>
+            <view class="detail-value">¥{{currentContract.baseSalary}}</view>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">合同开始日期：</view>
+            <view class="detail-value">{{currentContract.startDate}}</view>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">合同结束日期：</view>
+            <view class="detail-value">{{currentContract.endDate}}</view>
+          </view>
+          <view class="detail-row">
+            <view class="detail-label">合同状态：</view>
+            <view class="detail-value">
+              <view class="status-badge {{getStatusClass(currentContract.status)}}">
+                {{getStatusText(currentContract.status)}}
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <view class="detail-section">
+          <view class="section-title">时间信息</view>
+          <view class="detail-row">
+            <view class="detail-label">创建时间：</view>
+            <view class="detail-value">{{formatDate(currentContract.createdAt)}}</view>
+          </view>
+          <view class="detail-row" wx:if="{{currentContract.issueTime}}">
+            <view class="detail-label">下发时间：</view>
+            <view class="detail-value">{{formatDate(currentContract.issueTime)}}</view>
+          </view>
+          <view class="detail-row" wx:if="{{currentContract.employeeSignTime}}">
+            <view class="detail-label">员工签署时间：</view>
+            <view class="detail-value">{{formatDate(currentContract.employeeSignTime)}}</view>
+          </view>
+          <view class="detail-row" wx:if="{{currentContract.effectiveTime}}">
+            <view class="detail-label">合同生效时间：</view>
+            <view class="detail-value">{{formatDate(currentContract.effectiveTime)}}</view>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="btn-secondary" bindtap="viewPdf" wx:if="{{currentContract.contractPdfUrl}}">
+          预览PDF
+        </button>
+        <button class="btn-download" bindtap="downloadPdf" wx:if="{{currentContract.status === 2 && currentContract.contractPdfUrl}}">
+          下载PDF
+        </button>
+        <button class="btn-primary btn-sign" bindtap="openSignModal" wx:if="{{currentContract.status === 1}}">
+          立即签署
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 签名弹窗 -->
+  <view class="modal" wx:if="{{showSignModal}}">
+    <view class="modal-mask" catchtouchmove="preventTouchMove" bindtap="closeSignModal"></view>
+    <view class="modal-content" catchtouchmove="preventTouchMove">
+      <view class="modal-header">
+        <view class="modal-title">电子签名</view>
+        <view class="modal-close" bindtap="closeSignModal">✕</view>
+      </view>
+
+      <view class="modal-body">
+        <view class="sign-hint">请在下方区域内签名：</view>
+        <view class="canvas-container" catchtouchmove>
+          <canvas 
+            canvas-id="signCanvas" 
+            class="sign-canvas"
+            bindtouchstart="touchStart"
+            bindtouchmove="touchMove"
+            bindtouchend="touchEnd"
+            disable-scroll="true"
+            style="width: {{canvasWidth}}px; height: {{canvasHeight}}px;"
+          ></canvas>
+        </view>
+      </view>
+
+      <view class="modal-footer">
+        <button class="btn-secondary" bindtap="clearSignature">清空</button>
+        <button class="btn-primary" bindtap="confirmSignature">确认签名</button>
+      </view>
+    </view>
+  </view>
+</view>

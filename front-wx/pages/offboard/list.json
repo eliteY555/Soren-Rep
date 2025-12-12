@@ -1,0 +1,8 @@
+{
+  "navigationBarTitleText": "离职申请列表",
+  "navigationBarBackgroundColor": "#1890ff",
+  "navigationBarTextStyle": "white",
+  "enablePullDownRefresh": true,
+  "usingComponents": {}
+}
+

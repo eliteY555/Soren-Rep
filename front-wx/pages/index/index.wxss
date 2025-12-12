@@ -1,0 +1,189 @@
+/* 首页样式 */
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 30rpx;
+}
+
+/* 用户卡片 */
+.user-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24rpx;
+  padding: 40rpx 48rpx;
+  color: #fff;
+  margin-bottom: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(102, 126, 234, 0.25);
+}
+
+.user-greeting {
+  font-size: 48rpx;
+  font-weight: 700;
+  margin-bottom: 12rpx;
+  letter-spacing: 1rpx;
+}
+
+.user-phone {
+  font-size: 28rpx;
+  opacity: 0.95;
+  font-weight: 400;
+}
+
+/* 标题 */
+.section-title {
+  font-size: 36rpx;
+  color: #333;
+  font-weight: 600;
+  margin: 32rpx 0 24rpx 0;
+  display: flex;
+  align-items: center;
+}
+
+.section-title::before {
+  content: '';
+  width: 8rpx;
+  height: 36rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4rpx;
+  margin-right: 16rpx;
+}
+
+/* 合同统计 */
+.contract-stats {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 40rpx;
+}
+
+.stat-item {
+  flex: 1;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 48rpx 32rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+}
+
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6rpx;
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+}
+
+.stat-item:active {
+  transform: translateY(-6rpx);
+  box-shadow: 0 12rpx 32rpx rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+  font-size: 80rpx;
+  font-weight: 800;
+  margin-bottom: 16rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+}
+
+.stat-number.pending {
+  background: linear-gradient(135deg, #fa8c16 0%, #faad14 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stat-number.signed {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.stat-label {
+  font-size: 28rpx;
+  color: #666;
+  font-weight: 600;
+}
+
+/* 功能卡片 */
+.action-card-single {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.06);
+  margin-bottom: 32rpx;
+  transition: all 0.3s;
+}
+
+.action-card-single:active {
+  transform: scale(0.98);
+}
+
+.card-icon {
+  width: 96rpx;
+  height: 96rpx;
+  background: linear-gradient(135deg, #722ed1 0%, #9254de 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+  margin-right: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(114, 46, 209, 0.3);
+}
+
+.card-content {
+  flex: 1;
+}
+
+.card-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.card-desc {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.card-arrow {
+  font-size: 48rpx;
+  color: #d9d9d9;
+  font-weight: 300;
+}
+
+/* 功能说明 */
+.info-box {
+  background: linear-gradient(135deg, #e8ecff 0%, #f3e7ff 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-top: 32rpx;
+  border-left: 8rpx solid #667eea;
+}
+
+.info-title {
+  font-size: 30rpx;
+  color: #5a67d8;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}
+
+.info-text {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.8;
+  margin-bottom: 12rpx;
+}
+
+.info-text:last-child {
+  margin-bottom: 0;
+}

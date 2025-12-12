@@ -1,0 +1,54 @@
+<!--pages/login/login.wxml-->
+<view class="login-container">
+  <!-- 安全距离占位 -->
+  <view class="safe-area-top"></view>
+  
+  <!-- Logo和标题 -->
+  <view class="header">
+    <image class="logo" src="/images/a7aea972dc092408d8527d791814f6ad.jpg" mode="aspectFit"></image>
+    <view class="app-name">泰来云</view>
+    <view class="app-desc">企业数字化管理平台</view>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="login-form">
+    <view class="form-group">
+      <view class="form-label">📱 手机号</view>
+      <input 
+        class="form-input" 
+        placeholder="请输入手机号" 
+        placeholder-class="input-placeholder"
+        type="number"
+        maxlength="11"
+        value="{{phone}}"
+        bindinput="onPhoneInput"
+      />
+    </view>
+    
+    <view class="form-group">
+      <view class="form-label">🔒 密码</view>
+      <view class="password-wrapper">
+        <input 
+          class="form-input" 
+          placeholder="请输入密码" 
+          placeholder-class="input-placeholder"
+          password="{{!showPassword}}"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+          maxlength="20"
+        />
+        <view class="eye-icon" bindtap="togglePassword">
+          {{showPassword ? '👁️' : '🔒'}}
+        </view>
+      </view>
+    </view>
+
+    <button class="btn-login" bindtap="handleLogin">
+      <view class="btn-content">登录</view>
+    </button>
+    
+    <view class="hint">
+      <view class="hint-text">* 请使用系统分配的手机号和密码登录</view>
+    </view>
+  </view>
+</view>

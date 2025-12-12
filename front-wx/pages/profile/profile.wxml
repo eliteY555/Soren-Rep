@@ -1,0 +1,63 @@
+<!--pages/profile/profile.wxml-->
+<view class="container">
+  <view class="page-title">个人中心</view>
+  
+  <view class="user-card" wx:if="{{userInfo}}">
+    <view class="user-greeting">你好，{{userInfo.realName}}</view>
+    <view class="user-phone">{{userInfo.phone}}</view>
+  </view>
+
+  <!-- 账号管理 -->
+  <view class="section-title">账号管理</view>
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goToSettings">
+      <view class="menu-left">
+        <view class="menu-icon user-icon">👤</view>
+        <view>
+          <view class="menu-text">个人信息</view>
+          <view class="menu-desc">姓名、手机号、身份证等</view>
+        </view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    
+    <view class="menu-item" bindtap="goToChangePassword">
+      <view class="menu-left">
+        <view class="menu-icon pwd-icon">🔒</view>
+        <view>
+          <view class="menu-text">修改密码</view>
+          <view class="menu-desc">定期修改密码，保护账号安全</view>
+        </view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+
+  <!-- 其他设置 -->
+  <view class="section-title">其他</view>
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goToHelp">
+      <view class="menu-left">
+        <view class="menu-icon help-icon">❓</view>
+        <view>
+          <view class="menu-text">帮助与反馈</view>
+          <view class="menu-desc">常见问题、意见反馈</view>
+        </view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+    
+    <view class="menu-item" bindtap="goToAbout">
+      <view class="menu-left">
+        <view class="menu-icon info-icon">ℹ️</view>
+        <view>
+          <view class="menu-text">关于我们</view>
+          <view class="menu-desc">版本信息、服务协议</view>
+        </view>
+      </view>
+      <view class="menu-arrow">›</view>
+    </view>
+  </view>
+
+  <button class="btn-logout" bindtap="handleLogout">退出登录</button>
+</view>

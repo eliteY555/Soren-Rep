@@ -1,0 +1,52 @@
+<!--电子签名页面-->
+<view class="container">
+  <!-- 合同信息卡片 -->
+  <view class="contract-info">
+    <view class="info-title">合同信息</view>
+    <view class="info-grid">
+      <view class="info-item">
+        <text class="item-label">📋 申请编号</text>
+        <text class="item-value">{{applicationNo}}</text>
+      </view>
+      <view class="info-item">
+        <text class="item-label">👤 签署人</text>
+        <text class="item-value">{{employeeName}}</text>
+      </view>
+      <view class="info-item highlight">
+        <text class="item-label">📅 合同期限</text>
+        <text class="item-value">{{startDate}} 至 {{endDate}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 签名区域 -->
+  <view class="sign-section">
+    <view class="sign-label"><text class="required">*</text> ✍️ 请在下方签名</view>
+    <canvas 
+      canvas-id="signCanvas" 
+      class="sign-canvas" 
+      bindtouchstart="touchStart"
+      bindtouchmove="touchMove"
+      bindtouchend="touchEnd"
+      disable-scroll="true"
+    >
+    </canvas>
+    <view class="sign-actions">
+      <button class="btn-clear" bindtap="clearSignature">🗑️ 清空重写</button>
+      <button class="btn-preview" bindtap="previewSignature">👁️ 预览签名</button>
+    </view>
+  </view>
+
+  <!-- 警告提示 -->
+  <view class="warning-box">
+    <view class="warning-title">⚠️ 签名确认：</view>
+    <text class="warning-text">签名后合同将提交审批，请确认信息无误。领导审批并签字后合同即刻生效。</text>
+  </view>
+</view>
+
+<!-- 底部操作栏 -->
+<view class="bottom-actions">
+  <button class="btn-cancel" bindtap="goBack">取消</button>
+  <button class="btn-confirm" bindtap="submitSignature">确认签名</button>
+</view>
+

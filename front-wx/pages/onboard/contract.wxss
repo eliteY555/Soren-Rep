@@ -1,0 +1,195 @@
+/* 合同填写页面样式 */
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 30rpx;
+  padding-bottom: 140rpx;
+}
+
+/* 步骤提示 */
+.step-tip {
+  background: linear-gradient(135deg, #e8ecff 0%, #f3e7ff 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  border-left: 8rpx solid #667eea;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.step-icon {
+  width: 64rpx;
+  height: 64rpx;
+  background: rgba(102, 126, 234, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: 20rpx;
+}
+
+.step-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #5a67d8;
+}
+
+.step-desc {
+  font-size: 24rpx;
+  color: #666;
+  padding-left: 84rpx;
+}
+
+/* 合同卡片 */
+.contract-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.card-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 32rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 4rpx solid #f5f5f5;
+  display: flex;
+  align-items: center;
+}
+
+.card-title::before {
+  content: '';
+  width: 8rpx;
+  height: 32rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4rpx;
+  margin-right: 16rpx;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 24rpx 0;
+  font-size: 28rpx;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-label {
+  color: #666;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 500;
+  text-align: right;
+  max-width: 60%;
+}
+
+.info-value.salary {
+  color: #d46b08;
+  font-weight: 600;
+}
+
+/* 模板选择器样式 */
+.template-row {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.template-row .info-label {
+  margin-bottom: 16rpx;
+}
+
+.template-row .info-label.required::before {
+  content: '* ';
+  color: #ff6b6b;
+}
+
+.template-row picker {
+  width: 100%;
+}
+
+.picker-value {
+  width: 100%;
+  padding: 24rpx;
+  background: #f8f9fa;
+  border-radius: 12rpx;
+  border: 2rpx solid #e9ecef;
+  color: #495057;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.picker-value:empty::before {
+  content: '请选择合同模板';
+  color: #adb5bd;
+}
+
+/* 提示框 */
+.info-box {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border-left: 8rpx solid #1890ff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  font-size: 26rpx;
+  color: #0958d9;
+  line-height: 1.6;
+}
+
+/* 底部操作栏 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 32rpx;
+  border-top: 1rpx solid #f0f0f0;
+  display: flex;
+  gap: 24rpx;
+  z-index: 999;
+}
+
+.btn-back {
+  flex: 1;
+  height: 96rpx;
+  background: #f5f5f5;
+  color: #666;
+  border: 4rpx solid #e8e8e8;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-next {
+  flex: 1;
+  height: 96rpx;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 24rpx rgba(102, 126, 234, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+

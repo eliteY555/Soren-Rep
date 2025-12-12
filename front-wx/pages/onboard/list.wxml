@@ -1,0 +1,68 @@
+<!--申请列表页面-->
+<view class="container">
+  <!-- 统计卡片 -->
+  <view class="stats-row">
+    <view class="stat-item pending">
+      <text class="stat-icon">⏰</text>
+      <view class="stat-value">{{stats.pending}}</view>
+      <view class="stat-label">审批中</view>
+    </view>
+    <view class="stat-item success">
+      <text class="stat-icon">✅</text>
+      <view class="stat-value">{{stats.approved}}</view>
+      <view class="stat-label">已通过</view>
+    </view>
+    <view class="stat-item error">
+      <text class="stat-icon">❌</text>
+      <view class="stat-value">{{stats.rejected}}</view>
+      <view class="stat-label">已驳回</view>
+    </view>
+  </view>
+
+  <!-- 申请列表 -->
+  <view class="list-section">
+    <view wx:for="{{applications}}" wx:key="id" class="list-item {{item.status === 'PENDING_APPROVAL' || item.status === 'PENDING_SIGN' || item.status === 'PENDING' ? 'pending' : item.status === 'APPROVED' ? 'success' : 'error'}}" bindtap="goToDetail" data-id="{{item.id}}">
+      <view class="list-header">
+        <view>
+          <view class="list-title">入职申请 - {{item.position}}</view>
+          <view class="list-no">{{item.applicationNo}}</view>
+        </view>
+        <view class="status-badge {{item.status === 'PENDING_APPROVAL' || item.status === 'PENDING_SIGN' || item.status === 'PENDING' ? 'status-pending' : item.status === 'APPROVED' ? 'status-success' : 'status-error'}}">
+          {{item.statusDesc}}
+        </view>
+      </view>
+      
+      <view class="list-info">
+        <view class="info-item">
+          <text>👤 申请人：</text>
+          <text class="value">{{item.employeeName}}</text>
+        </view>
+        <view class="info-item">
+          <text>📅 入职日期：</text>
+          <text class="value">{{item.startDate}}</text>
+        </view>
+        <view class="info-item">
+          <text>🔄 当前节点：</text>
+          <text class="value status">{{item.statusDesc}}</text>
+        </view>
+      </view>
+      
+      <view class="list-footer">
+        🕐 提交时间：{{item.createTime}}
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view wx:if="{{applications.length === 0}}" class="empty-state">
+      <text class="empty-icon">📋</text>
+      <text class="empty-text">暂无申请记录</text>
+      <button class="btn-create" bindtap="goToApply">立即申请</button>
+    </view>
+  </view>
+
+  <!-- 新建按钮 -->
+  <view wx:if="{{applications.length > 0}}" class="fab" bindtap="goToApply">
+    <text class="fab-icon">+</text>
+  </view>
+</view>
+

@@ -1,0 +1,84 @@
+<!--入职申请页面-->
+<view class="container">
+  <!-- 步骤提示 -->
+  <view class="step-tip">
+    <view class="step-header">
+      <view class="step-number">1</view>
+      <text class="step-title">第1步：填写基本信息</text>
+    </view>
+    <text class="step-desc">请如实填写个人信息，*号为必填项</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-section">
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 👤 姓名</view>
+      <input class="form-input" placeholder="请输入真实姓名" bindinput="onEmployeeNameInput" value="{{formData.employeeName}}" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 💼 应聘岗位</view>
+      <picker mode="selector" range="{{positions}}" bindchange="onPositionChange">
+        <view class="form-input picker">
+          {{formData.position || '请选择应聘岗位'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 📅 合同开始日期</view>
+      <picker mode="date" start="{{todayDate}}" bindchange="onStartDateChange">
+        <view class="form-input picker">
+          {{formData.startDate || '请选择日期'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 📅 合同结束日期</view>
+      <picker mode="date" start="{{formData.startDate || todayDate}}" bindchange="onEndDateChange">
+        <view class="form-input picker">
+          {{formData.endDate || '请选择日期'}}
+        </view>
+      </picker>
+      <text class="form-hint" wx:if="{{contractDuration}}">合同期限：{{contractDuration}}</text>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 💰 基本工资（元/月）</view>
+      <input class="form-input" type="digit" placeholder="请输入基本工资" bindinput="onBaseSalaryInput" value="{{formData.baseSalary}}" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 📸 身份证照片</view>
+      <view class="upload-section">
+        <view class="upload-item">
+          <view class="upload-box" bindtap="uploadIdCardFront">
+            <image wx:if="{{idCardFrontUrl}}" src="{{idCardFrontUrl}}" mode="aspectFill" class="upload-image" />
+            <view wx:else class="upload-placeholder">
+              <text class="upload-icon">+</text>
+              <text class="upload-text">正面照</text>
+            </view>
+          </view>
+        </view>
+        <view class="upload-item">
+          <view class="upload-box" bindtap="uploadIdCardBack">
+            <image wx:if="{{idCardBackUrl}}" src="{{idCardBackUrl}}" mode="aspectFill" class="upload-image" />
+            <view wx:else class="upload-placeholder">
+              <text class="upload-icon">+</text>
+              <text class="upload-text">反面照</text>
+            </view>
+          </view>
+        </view>
+      </view>
+      <text class="form-hint">支持拍照或从相册选择，图片将自动压缩</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <button class="btn-secondary" bindtap="saveDraft">保存草稿</button>
+    <button class="btn-primary" bindtap="nextStep">下一步</button>
+  </view>
+</view>
+

@@ -1,0 +1,189 @@
+/* 离职申请页面样式 */
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 30rpx;
+  padding-bottom: 140rpx;
+}
+
+/* 步骤提示 */
+.step-tip {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+  border-left: 8rpx solid #1890ff;
+}
+
+.step-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.step-number {
+  width: 64rpx;
+  height: 64rpx;
+  background: rgba(24, 144, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #0958d9;
+  margin-right: 20rpx;
+}
+
+.step-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #0958d9;
+}
+
+.step-desc {
+  font-size: 24rpx;
+  color: #666;
+  padding-left: 84rpx;
+}
+
+/* 表单区域 */
+.form-section {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 32rpx;
+}
+
+.form-group {
+  margin-bottom: 40rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-bottom: 20rpx;
+  font-weight: 500;
+}
+
+.required {
+  color: #ff4757;
+  margin-right: 6rpx;
+}
+
+.form-input {
+  width: 100%;
+  height: 96rpx;
+  border: 4rpx solid #e8e8e8;
+  border-radius: 24rpx;
+  padding: 0 32rpx;
+  font-size: 28rpx;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.form-input.picker {
+  line-height: 96rpx;
+  color: #333;
+}
+
+.form-textarea {
+  width: 100%;
+  min-height: 200rpx;
+  border: 4rpx solid #e8e8e8;
+  border-radius: 24rpx;
+  padding: 24rpx 32rpx;
+  font-size: 28rpx;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.char-count {
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 12rpx;
+  padding-left: 8rpx;
+  display: block;
+  text-align: right;
+}
+
+/* 提示信息框 */
+.info-box {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border-left: 8rpx solid #1890ff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  display: flex;
+  gap: 16rpx;
+  margin-bottom: 32rpx;
+}
+
+.info-icon {
+  font-size: 48rpx;
+  flex-shrink: 0;
+}
+
+.info-content {
+  flex: 1;
+}
+
+.info-title {
+  font-size: 28rpx;
+  color: #0958d9;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.info-text {
+  font-size: 24rpx;
+  color: #0958d9;
+  line-height: 1.8;
+  margin-bottom: 6rpx;
+}
+
+/* 底部操作栏 */
+.bottom-actions {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  padding: 32rpx;
+  border-top: 1rpx solid #f0f0f0;
+  display: flex;
+  gap: 24rpx;
+  z-index: 999;
+}
+
+.btn-secondary {
+  flex: 1;
+  height: 96rpx;
+  background: #f5f5f5;
+  color: #666;
+  border: 4rpx solid #e8e8e8;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+
+.btn-primary {
+  flex: 1;
+  height: 96rpx;
+  background: linear-gradient(135deg, #1890ff 0%, #0958d9 100%);
+  color: #fff;
+  border-radius: 48rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 24rpx rgba(24, 144, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  line-height: 1;
+}
+

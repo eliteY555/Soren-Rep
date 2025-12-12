@@ -1,0 +1,63 @@
+<!--合同填写页面-->
+<view class="container">
+  <!-- 进度提示 -->
+  <view class="step-tip">
+    <view class="step-header">
+      <view class="step-icon">📝</view>
+      <text class="step-title">第2步：确认合同信息</text>
+    </view>
+    <text class="step-desc">请确认合同信息，确认无误后进行电子签名</text>
+  </view>
+
+  <!-- 合同信息 -->
+  <view class="contract-card">
+    <view class="card-title">合同信息</view>
+    
+    <view class="info-row">
+      <text class="info-label">👤 员工姓名</text>
+      <text class="info-value">{{contractData.employeeName}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="info-label">💼 岗位</text>
+      <text class="info-value">{{contractData.position}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="info-label">📅 合同期限</text>
+      <text class="info-value">{{contractData.startDate}} 至 {{contractData.endDate}}</text>
+    </view>
+    
+    <view class="info-row">
+      <text class="info-label">💰 基本工资</text>
+      <text class="info-value salary">{{contractData.baseSalary}}元/月</text>
+    </view>
+    
+    <view class="info-row" wx:if="{{contractData.department}}">
+      <text class="info-label">🏢 部门</text>
+      <text class="info-value">{{contractData.department}}</text>
+    </view>
+
+    <!-- 新增：选择合同模板 -->
+    <view class="info-row template-row">
+      <text class="info-label required">📄 合同模板</text>
+      <picker bindchange="onTemplateChange" value="{{selectedTemplateIndex}}" range="{{templates}}" range-key="templateName">
+        <view class="picker-value">
+          {{selectedTemplateIndex >= 0 ? templates[selectedTemplateIndex].templateName : '请选择合同模板'}}
+        </view>
+      </picker>
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="info-box">
+    💡 确认合同信息无误后，请进行电子签名。签名后将提交审批，领导审批并签字后合同即刻生效。
+  </view>
+</view>
+
+<!-- 底部操作栏 -->
+<view class="bottom-actions">
+  <button class="btn-back" bindtap="goBack">返回修改</button>
+  <button class="btn-next" bindtap="goToSign">下一步</button>
+</view>
+

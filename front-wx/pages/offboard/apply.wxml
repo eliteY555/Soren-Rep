@@ -1,0 +1,77 @@
+<!--离职申请页面-->
+<view class="container">
+  <!-- 步骤提示 -->
+  <view class="step-tip">
+    <view class="step-header">
+      <view class="step-number">1</view>
+      <text class="step-title">第1步：填写离职信息</text>
+    </view>
+    <text class="step-desc">请如实填写离职相关信息，*号为必填项</text>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-section">
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 👤 姓名</view>
+      <input class="form-input" placeholder="请输入真实姓名" bindinput="onEmployeeNameInput" value="{{formData.employeeName}}" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 💼 当前岗位</view>
+      <input class="form-input" placeholder="请输入当前岗位" bindinput="onPositionInput" value="{{formData.position}}" />
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 📅 申请离职日期</view>
+      <picker mode="date" start="{{todayDate}}" bindchange="onOffboardDateChange">
+        <view class="form-input picker">
+          {{formData.offboardDate || '请选择离职日期'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label"><text class="required">*</text> 📝 离职原因</view>
+      <picker mode="selector" range="{{reasons}}" bindchange="onReasonChange">
+        <view class="form-input picker">
+          {{formData.reason || '请选择离职原因'}}
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">💬 详细说明</view>
+      <textarea 
+        class="form-textarea" 
+        placeholder="请详细说明离职原因（选填）" 
+        bindinput="onReasonDetailInput" 
+        value="{{formData.reasonDetail}}"
+        maxlength="500"
+      />
+      <text class="char-count">{{formData.reasonDetail.length}}/500</text>
+    </view>
+
+    <view class="form-group">
+      <view class="form-label">📞 联系电话</view>
+      <input class="form-input" type="number" placeholder="请输入联系电话" bindinput="onPhoneInput" value="{{formData.phone}}" maxlength="11" />
+    </view>
+  </view>
+
+  <!-- 提示信息 -->
+  <view class="info-box">
+    <view class="info-icon">💡</view>
+    <view class="info-content">
+      <view class="info-title">温馨提示</view>
+      <view class="info-text">• 离职申请需提前30天提交</view>
+      <view class="info-text">• 提交后需等待领导审批</view>
+      <view class="info-text">• 审批通过后需完成工作交接</view>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="bottom-actions">
+    <button class="btn-secondary" bindtap="saveDraft">保存草稿</button>
+    <button class="btn-primary" bindtap="nextStep">下一步</button>
+  </view>
+</view>
+

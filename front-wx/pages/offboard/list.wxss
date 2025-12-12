@@ -1,0 +1,213 @@
+/* 离职申请列表页面样式 */
+.container {
+  min-height: 100vh;
+  background: #f8f9fa;
+  padding: 30rpx;
+  padding-bottom: 30rpx;
+}
+
+/* 统计卡片 */
+.stats-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 32rpx;
+}
+
+.stat-item {
+  flex: 1;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 20rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.06);
+  border-top: 6rpx solid #999;
+}
+
+.stat-item.pending {
+  border-top-color: #1890ff;
+}
+
+.stat-item.success {
+  border-top-color: #52c41a;
+}
+
+.stat-item.error {
+  border-top-color: #ff4d4f;
+}
+
+.stat-icon {
+  font-size: 40rpx;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.stat-value {
+  font-size: 40rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.stat-item.pending .stat-value {
+  color: #1890ff;
+}
+
+.stat-item.success .stat-value {
+  color: #52c41a;
+}
+
+.stat-item.error .stat-value {
+  color: #ff4d4f;
+}
+
+.stat-label {
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 列表区域 */
+.list-section {
+  min-height: 400rpx;
+}
+
+.list-item {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.06);
+  border-left: 8rpx solid #999;
+}
+
+.list-item.pending {
+  border-left-color: #1890ff;
+}
+
+.list-item.success {
+  border-left-color: #52c41a;
+}
+
+.list-item.error {
+  border-left-color: #ff4d4f;
+}
+
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.list-title {
+  font-size: 32rpx;
+  color: #333;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.list-no {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.status-badge {
+  padding: 8rpx 24rpx;
+  border-radius: 24rpx;
+  font-size: 24rpx;
+  font-weight: 500;
+}
+
+.status-pending {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  color: #0958d9;
+}
+
+.status-success {
+  background: linear-gradient(135deg, #f6ffed 0%, #d9f7be 100%);
+  color: #389e0d;
+}
+
+.status-error {
+  background: linear-gradient(135deg, #fff2f0 0%, #ffccc7 100%);
+  color: #cf1322;
+}
+
+.list-info {
+  font-size: 28rpx;
+  color: #666;
+  line-height: 1.8;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8rpx;
+}
+
+.info-item .value {
+  color: #333;
+  font-weight: 500;
+}
+
+.info-item .value.status {
+  color: #1890ff;
+}
+
+.list-footer {
+  margin-top: 24rpx;
+  padding-top: 24rpx;
+  border-top: 2rpx solid #f5f5f5;
+  font-size: 24rpx;
+  color: #999;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100rpx 0;
+}
+
+.empty-icon {
+  font-size: 128rpx;
+  margin-bottom: 32rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+  margin-bottom: 48rpx;
+}
+
+.btn-create {
+  width: 280rpx;
+  height: 88rpx;
+  background: linear-gradient(135deg, #1890ff 0%, #0958d9 100%);
+  color: #fff;
+  border-radius: 44rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+/* 悬浮按钮 */
+.fab {
+  position: fixed;
+  right: 40rpx;
+  bottom: 120rpx;
+  width: 112rpx;
+  height: 112rpx;
+  background: linear-gradient(135deg, #1890ff 0%, #0958d9 100%);
+  border-radius: 56rpx;
+  box-shadow: 0 8rpx 32rpx rgba(250, 140, 22, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.fab-icon {
+  font-size: 64rpx;
+  color: #fff;
+  line-height: 1;
+}
+

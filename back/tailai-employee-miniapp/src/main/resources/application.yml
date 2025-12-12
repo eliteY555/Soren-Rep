@@ -1,0 +1,72 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: tailai-employee-miniapp
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://8.137.153.9:3306/tailai_admin?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: remote_user
+    password: ${MYSQL_PW}
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+# MyBatis-Plus配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+  mapper-locations: classpath*:mapper/**/*.xml
+
+# 文件服务地址
+file-service:
+  url: http://localhost:8090
+
+# 微信小程序配置
+wechat:
+  miniapp:
+    app-id: your_app_id
+    app-secret: your_app_secret
+
+# Knife4j配置
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+  openapi:
+    title: 员工小程序API文档
+    description: 泰来云 - 员工小程序服务接口
+    version: 1.0.0
+    concat: 泰来云开发团队
+    url: https://tailai.com
+    email: dev@tailai.com
+    group:
+      default:
+        group-name: 员工接口
+        api-rule: package
+        api-rule-resources:
+          - com.tailai.miniapp.controller
+
+# 日志配置
+logging:
+  level:
+    com.tailai: debug
+  pattern:
+    console: '%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{50} - %msg%n'
+
+
+
+
+
+
+
