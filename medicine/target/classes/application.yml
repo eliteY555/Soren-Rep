@@ -1,0 +1,48 @@
+server:
+  #设置端口号
+  port: 9999 #默认端口是8080
+
+spring:
+  datasource:
+    #数据库用户名
+    username: root
+    #数据库用户密码
+    password: 2003
+    #serverTimezone=UTC 解决市区的报错 一般mysql是8.0以上的是必须配置这个
+    #userUnicode=true&characterEncoding=utf-8 指定字符编码、解码格式
+    url: jdbc:mysql://localhost:3306/medicine?serverTimezone=UTC&userUnicode=true&characterEncoding=utf-8
+    #设置驱动类
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/chat_memory_db
+  # Hibernate 配置
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+# 配置mybatis
+mybatis:
+  #指定pojo扫描包位置让mybatis自动扫描到指定义的pojo包下
+  type-aliases-package: com.me.pojo
+  #指定位置扫描Mapper接口对应的XML文件 classpath:xml文件位置
+  mapper-locations: classpath:mapper/*.xml
+
+langchain4j:
+  community:
+    dashscope:
+      chat-model:
+        api-key: ${QWEN-KEY}
+        model-name: qwen-max
+      streaming-chat-model:
+        api-key: ${QWEN-KEY}
+        model-name: qwen-max
+      embedding-model:
+        model-name: text-embedding-v3
+        api-key: ${QWEN-KEY}
+logging:
+  level:
+    root: info

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.me.mapper.RecordMapper">
+
+    <!-- 插入病历记录 -->
+    <insert id="add" parameterType="Record">
+        INSERT INTO record (patientId, doctorId, patientName, sex, age, phone, oldHistory, allergiesHistory, habits, description, tongue)
+        VALUES (#{patientId}, #{doctorId}, #{patientName}, #{sex}, #{age}, #{phone}, #{oldHistory}, #{allergiesHistory}, #{habits}, #{description}, #{tongue})
+    </insert>
+
+    <select id="queryAll" resultType="RecordDTO">
+        SELECT
+        r.recordId,
+        r.patientName,
+        r.phone,
+        r.age,
+        r.description,
+        r.status,
+        r.score,
+        r.createTime,
+        r.updateTime,
+        d.doctorId,
+        d.doctorName,
+        d.departmentName,
+        d.hospitalName
+        FROM
+        record r
+        LEFT JOIN
+        doctor d ON r.doctorId = d.doctorId
+        <where>
+            <!-- 如果传入了status参数，则按状态筛选 -->
+            <if test="status != null and !status.isEmpty()">
+                AND r.status IN
+                <foreach item="item" collection="status.split(',')" open="(" separator="," close=")">
+                    #{item}
+                </foreach>
+            </if>
+            <!-- 如果传入了patientId，则按患者ID筛选 -->
+            <if test="patientId != null">
+                AND r.patientId = #{patientId}
+            </if>
+            <!-- 如果传入了doctorId，则按医生ID筛选 -->
+            <if test="doctorId != null">
+                AND d.doctorId = #{doctorId}
+            </if>
+        </where>
+        ORDER BY
+        r.createTime DESC
+        LIMIT #{offset}, #{pageSize}
+    </select>
+
+    <select id="countRecordList" resultType="int" parameterType="map">
+        SELECT COUNT(*)
+        FROM record r
+        LEFT JOIN doctor d ON r.doctorId = d.doctorId
+        <where>
+            <if test="status != null and status != ''">
+                AND r.status IN
+                <foreach item="status" collection="status.split(',')" open="(" separator="," close=")">
+                    #{status}
+                </foreach>
+            </if>
+            <if test="patientId != null">
+                AND r.patientId = #{patientId}
+            </if>
+            <if test="patientName != null and patientName != ''">
+                AND r.patientName LIKE CONCAT('%', #{patientName}, '%')
+            </if>
+            <if test="doctorName != null and doctorName != ''">
+                AND d.doctorName LIKE CONCAT('%', #{doctorName}, '%')
+            </if>
+            <if test="doctorId != null">
+                AND d.doctorId = #{doctorId}
+            </if>
+        </where>
+    </select>
+
+    <select id="queryRecordById" parameterType="int" resultType="Record">
+        SELECT * FROM record r LEFT JOIN doctor d ON r.doctorId = d.doctorId WHERE recordId=#{recordId}
+    </select>
+
+    <update id="update" parameterType="Record">
+        update record set status=#{status}, score=#{score} where recordId=#{recordId};
+    </update>
+</mapper>

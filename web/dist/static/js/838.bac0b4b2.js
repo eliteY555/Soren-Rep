@@ -1,0 +1,1 @@
+"use strict";(self["webpackChunkzhenyitong_online_medical"]=self["webpackChunkzhenyitong_online_medical"]||[]).push([[838],{1457:function(n,e,l){l.r(e);var u,i,t=l(1656),a={},c=(0,t.A)(a,u,i,!1,null,null,null);e["default"]=c.exports}}]);

@@ -1,0 +1,158 @@
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+  font-size: 14px;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  /* 诊易通主题配色系统 */
+  --base-color: #a8824a;
+  --base-color-light: #c9a86b;
+  --base-color-dark: #8b6a34;
+  
+  /* 新增诊易通特色色彩 */
+  --cinnabar-red: #c23b22;        /* 朱砂红 - 传统中药朱砂 */
+  --realgar-orange: #e8873c;      /* 雄黄橙 - 传统中药雄黄 */
+  --indigo-blue: #5d7599;         /* 靛蓝色 - 传统中药靛青 */
+  --rhubarb-brown: #8a5d3b;       /* 大黄棕 - 传统中药大黄 */
+  --mint-green: #8fc31f;          /* 薄荷绿 - 传统中药薄荷 */
+  --lotus-pink: #e4b1ab;          /* 荷花粉 - 传统中药荷花 */
+  --bamboo-green: #7fae90;        /* 竹叶绿 - 传统中药竹叶 */
+  --licorice-tan: #be9c79;        /* 甘草棕 - 传统中药甘草 */
+  --ginseng-beige: #e8d6c3;       /* 人参米 - 传统中药人参 */
+  --chrysanthemum-yellow: #ffd86b; /* 菊花黄 - 传统中药菊花 */
+  
+  /* 渐变效果 */
+  --gradient-cinnabar: linear-gradient(135deg, var(--cinnabar-red), #e06653);
+  --gradient-herbal: linear-gradient(135deg, var(--bamboo-green), var(--mint-green));
+  --gradient-parchment: linear-gradient(135deg, var(--ginseng-beige), #f8f0dd);
+  --gradient-lotus: linear-gradient(135deg, white, var(--lotus-pink));
+  --gradient-chrysanthemum: linear-gradient(135deg, var(--chrysanthemum-yellow), var(--realgar-orange));
+  --gradient-header: linear-gradient(to right, var(--rhubarb-brown), var(--licorice-tan));
+  
+  --base-shadow: 0 4px 12px rgba(168, 130, 74, 0.15);
+  --text-color: #333333;
+  --text-color-light: #686b70;
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --border-color: #e0d6c6;
+  --bg-light: #f9f6f0;
+  --bg-sidebar: #f3ece2;
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+  --border-radius: 4px;
+  --border-radius-lg: 8px;
+  overflow: hidden;
+  color: var(--text-color);
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+}
+
+/* 修复菜单显示问题 */
+.el-menu--horizontal {
+  display: flex !important;
+}
+
+.el-menu--horizontal > .el-menu-item {
+  display: inline-block !important;
+  float: none !important;
+}
+
+/* 确保下拉菜单显示在顶部 */
+.el-dropdown-menu {
+  z-index: 2000 !important;
+}
+
+/* 诊易通特色图案背景类 */
+.bg-pattern-clouds {
+  background-color: transparent;
+  background-image: url('@/assets/images/patterns/cloud-pattern.svg');
+  background-size: 200px;
+  background-repeat: repeat;
+  background-position: center;
+  opacity: 0.15;
+}
+
+.pattern-bg-floral {
+  background-color: transparent;
+  background-image: url('@/assets/images/patterns/floral-pattern.svg');
+  background-size: 150px;
+  background-repeat: repeat;
+  background-position: center;
+  opacity: 0.12;
+}
+
+.pattern-bg-geometric {
+  background-color: transparent;
+  background-image: url('@/assets/images/patterns/geometric-pattern.svg');
+  background-size: 100px;
+  background-repeat: repeat;
+  background-position: center;
+  opacity: 0.1;
+}
+
+/* 诊易通特色装饰边框 */
+.border-decorative {
+  border: 1px solid var(--base-color);
+  border-radius: 8px;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border: 1px dashed rgba(168, 130, 74, 0.5);
+    border-radius: 4px;
+    pointer-events: none;
+  }
+}
+
+.t-cursor {
+  cursor: pointer;
+}
+
+.flex-align-center {
+  display: flex;
+  align-items: center;
+}
+
+.clearfix:before,
+.clearfix:after {
+  display: table;
+  content: "";
+}
+.clearfix:after {
+  clear: both
+}
+
+/* 按钮焦点轮廓 */
+button:focus, a:focus {
+  outline: none;
+}
+
+/* 全局过渡效果 */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter,
+.fade-leave-to {
+  opacity: 0;
+}
+
+/* 增强表单样式 */
+input:focus {
+  outline: none;
+}
+

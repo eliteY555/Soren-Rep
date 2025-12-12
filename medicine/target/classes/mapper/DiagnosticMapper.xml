@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.me.mapper.DiagnosticMapper">
+    <!-- 查询诊断信息 -->
+    <select id="queryDiagnosticById" parameterType="int" resultType="Diagnostic">
+        SELECT * FROM diagnostic WHERE recordId = #{recordId}
+    </select>
+    
+    <!-- 插入诊断信息 -->
+    <insert id="insertDiagnostic" parameterType="Diagnostic">
+        INSERT INTO diagnostic (recordId, result, prescription, orders)
+        VALUES (#{recordId}, #{result}, #{prescription}, #{orders})
+    </insert>
+    
+    <!-- 更新诊断信息 -->
+    <update id="updateDiagnostic" parameterType="Diagnostic">
+        UPDATE diagnostic 
+        SET result = #{result}, 
+            prescription = #{prescription}, 
+            orders = #{orders}
+        WHERE recordId = #{recordId}
+    </update>
+    
+    <!-- 获取所有诊断记录及其详细信息 -->
+    <select id="getAllDiagnosticsWithDetails" resultType="java.util.HashMap">
+        SELECT 
+            d.diagnosticId,
+            d.recordId,
+            d.result,
+            d.prescription,
+            d.orders,
+            r.status,
+            r.score,
+            doc.doctorId,
+            doc.doctorName as docName,
+            doc.hospitalName,
+            doc.departmentName
+        FROM 
+            diagnostic d
+        JOIN 
+            record r ON d.recordId = r.recordId
+        JOIN 
+            doctor doc ON r.doctorId = doc.doctorId
+        WHERE 
+            r.status = 3  -- 只选择已完成的诊断
+        ORDER BY 
+            CASE WHEN r.score IS NULL THEN 0 ELSE 1 END DESC, r.score DESC
+    </select>
+</mapper>
