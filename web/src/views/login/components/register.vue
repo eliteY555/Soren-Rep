@@ -83,8 +83,8 @@
 </template>
 
 <script>
-import { register } from "@/api/user";
-import { updateDoctorInfo, createDoctorInfo } from "@/api/doctor";
+import { patientRegister } from "@/api/patient";
+import { doctorRegister } from "@/api/doctor";
 import { Encrypt } from "@/utils/secret";
 export default {
   components: {},
@@ -195,74 +195,59 @@ export default {
             this.loading = true;
             // 对密码进行加密
             const password = Encrypt(this.ruleForm.password);
-            
-            // 提取基础用户信息
-            const userData = {
-              username: this.ruleForm.username,
-              password,
-              phone: this.ruleForm.phone,
-              email: this.ruleForm.email,
-              role: this.ruleForm.role
-            };
-            
-            // 1. 先注册用户基本信息
-            console.log("开始注册用户基本信息...");
-            const userRes = await register(userData);
-            
-            console.log("用户注册API响应:", userRes);
-            
-            // 检查userRes是否有值，以及是否有userId字段
-            if (userRes && userRes.userId) {
-              console.log(`用户注册成功，获取到userId: ${userRes.userId}`);
-              
-              // 2. 如果是医生角色，创建医生专业信息
-              if (this.ruleForm.role === 1) {
-                try {
-                  console.log("开始创建医生专业信息...");
-                  
-                  // 准备医生信息，确保包含userId作为外键
-                  const doctorData = {
-                    userId: userRes.userId,  // 关键字段：用户ID作为外键关联user表
-                    doctorName: this.ruleForm.username,
-                    cityName: this.ruleForm.cityName,
-                    hospitalName: this.ruleForm.hospitalName,
-                    departmentName: this.ruleForm.departmentName,
-                    introduction: this.ruleForm.introduction
-                  };
-                  
-                  console.log("正在提交医生信息:", JSON.stringify(doctorData));
-                  
-                  // 创建医生信息记录
-                  const doctorRes = await createDoctorInfo(doctorData);
-                  console.log("医生信息创建成功", doctorRes);
-                  this.$message.success("医师注册成功");
-                } catch (error) {
-                  console.error("医师信息创建失败:", error);
-                  // 如果医生信息保存失败，可以考虑删除已创建的用户账号
-                  // 这里需要添加回滚操作，但API可能不支持，所以给出清晰的错误提示
-                  this.$message.error("医师信息创建失败，请联系管理员。您可以稍后使用相同的用户名重新注册");
-                }
-              } else {
+
+            if (this.ruleForm.role === 0) {
+              // 患者注册：直接写入 patient 表
+              const patientData = {
+                patientName: this.ruleForm.username,
+                username: this.ruleForm.username,
+                password,
+                phone: this.ruleForm.phone,
+                email: this.ruleForm.email,
+                sex: 0,
+                age: null
+              };
+              console.log("开始注册患者...");
+              const res = await patientRegister(patientData);
+              console.log("患者注册响应:", res);
+              if (res && res.patientId) {
+                console.log(`患者注册成功，patientId: ${res.patientId}`);
                 this.$message.success("患者注册成功");
+                this.$emit("switchToLogin");
+              } else {
+                this.$message.error("注册异常，请稍后再试");
               }
-              
-              // 注册成功跳转到登录页面
-              this.$emit("switchToLogin");
             } else {
-              // 用户注册成功但未返回userId的情况
-              console.error("用户注册异常：未返回用户ID", JSON.stringify(userRes));
-              this.$message.error("注册异常，请检查用户名是否已存在");
+              // 医生注册：直接写入 doctor 表
+              const doctorData = {
+                doctorName: this.ruleForm.username,
+                username: this.ruleForm.username,
+                password,
+                phone: this.ruleForm.phone,
+                email: this.ruleForm.email,
+                cityName: this.ruleForm.cityName,
+                hospitalName: this.ruleForm.hospitalName,
+                departmentName: this.ruleForm.departmentName,
+                introduction: this.ruleForm.introduction
+              };
+              console.log("开始注册医生...");
+              const res = await doctorRegister(doctorData);
+              console.log("医生注册响应:", res);
+              if (res && res.doctorId) {
+                console.log(`医生注册成功，doctorId: ${res.doctorId}`);
+                this.$message.success("医师注册成功");
+                this.$emit("switchToLogin");
+              } else {
+                this.$message.error("注册异常，请稍后再试");
+              }
             }
           } catch (error) {
             console.error("注册失败:", error);
-            // 提供更具体的错误信息
             let errorMsg = "注册失败";
-            if (error.response && error.response.data && error.response.data.message) {
-              errorMsg += `: ${error.response.data.message}`;
+            if (error.response && error.response.data && error.response.data.msg) {
+              errorMsg = error.response.data.msg;
             } else if (error.message) {
               errorMsg += `: ${error.message}`;
-            } else {
-              errorMsg += "，请稍后再试";
             }
             this.$message.error(errorMsg);
           } finally {

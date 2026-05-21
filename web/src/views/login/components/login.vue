@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import { login } from "@/api/user";
+import { login } from "@/api/auth";
 import { Encrypt } from "@/utils/secret";
 export default {
   components: {},

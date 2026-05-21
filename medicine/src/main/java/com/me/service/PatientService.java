@@ -4,8 +4,16 @@ import com.me.pojo.Patient;
 
 public interface PatientService {
     int updatePatientInfo(Patient patient);
-    
+
     int createPatientInfo(Patient patient);
 
-    Patient getPatientByUserId(Integer userId);
+    Patient getPatientById(Integer patientId);
+
+    Patient findByPhone(String phone);
+
+    Patient login(String phone, String password);
+
+    Patient register(Patient patient);
+
+    int updateAccount(Patient patient);
 }

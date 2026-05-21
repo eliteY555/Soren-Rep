@@ -4,10 +4,10 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.me.mapper.DoctorMapper">
-    <!-- 更新患者信息 -->
+    <!-- 注册/更新医生信息（UPSERT） -->
     <update id="updateDoctorInfo" parameterType="Doctor">
-        INSERT INTO doctor (userId, doctorName, cityName, hospitalName, departmentName, introduction)
-        VALUES (#{userId}, #{doctorName}, #{cityName}, #{hospitalName}, #{departmentName}, #{introduction})
+        INSERT INTO doctor (doctorName, username, password, phone, email, cityName, hospitalName, departmentName, introduction)
+        VALUES (#{doctorName}, #{username}, #{password}, #{phone}, #{email}, #{cityName}, #{hospitalName}, #{departmentName}, #{introduction})
             ON DUPLICATE KEY UPDATE
                 doctorName = VALUES(doctorName),
                 cityName = VALUES(cityName),
@@ -16,16 +16,16 @@
                 introduction = VALUES(introduction)
     </update>
 
-    <!-- 根据 userId 查询医生信息 -->
-    <select id="getDoctorByUserId" parameterType="int" resultType="Doctor">
-        SELECT * from doctor WHERE userId = #{userId}
+    <!-- 根据 doctorId 查询医生信息 -->
+    <select id="getDoctorById" parameterType="int" resultType="Doctor">
+        SELECT * FROM doctor WHERE doctorId = #{doctorId}
     </select>
 
     <select id="queryAll" resultType="Doctor">
-        select * from doctor;
+        SELECT * FROM doctor;
     </select>
 
-    <!-- 在DoctorMapper.xml中添加分页查询 -->
+    <!-- 分页查询 -->
     <select id="selectDoctorList" resultType="Doctor" parameterType="map">
         SELECT * FROM doctor
         <where>
@@ -56,4 +56,22 @@
             </if>
         </where>
     </select>
+
+    <!-- 通过手机号查找医生 -->
+    <select id="findByPhone" parameterType="String" resultType="Doctor">
+        SELECT * FROM doctor WHERE phone = #{phone} LIMIT 1
+    </select>
+
+    <!-- 通过手机号和密码查找医生（登录） -->
+    <select id="findByPhoneAndPassword" resultType="Doctor">
+        SELECT * FROM doctor WHERE phone = #{phone} AND password = #{password} LIMIT 1
+    </select>
+
+    <!-- 更新医生账号信息 -->
+    <update id="updateAccount" parameterType="Doctor">
+        UPDATE doctor
+        SET doctorName = #{doctorName}, phone = #{phone}, email = #{email}
+        <if test="password != null and password != ''">, password = #{password}</if>
+        WHERE doctorId = #{doctorId}
+    </update>
 </mapper>

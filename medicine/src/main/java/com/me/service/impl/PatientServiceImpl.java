@@ -13,26 +13,40 @@ public class PatientServiceImpl implements PatientService {
 
     @Override
     public int updatePatientInfo(Patient patient) {
-        System.out.println("更新患者信息: " + patient);
-        if (patient.getUserId() == null) {
-            throw new IllegalArgumentException("userId不能为空");
+        if (patient.getPatientId() == null) {
+            throw new IllegalArgumentException("patientId不能为空");
         }
         return patientMapper.updatePatientInfo(patient);
     }
 
     @Override
     public int createPatientInfo(Patient patient) {
-        System.out.println("创建患者信息: " + patient);
-        if (patient.getUserId() == null) {
-            throw new IllegalArgumentException("userId不能为空");
-        }
         return patientMapper.insertPatientInfo(patient);
     }
 
     @Override
-    public Patient getPatientByUserId(Integer userId) {
-        Patient patient = patientMapper.getPatientByUserId(userId);
-        System.out.println("查询结果: " + patient);
+    public Patient getPatientById(Integer patientId) {
+        return patientMapper.getPatientById(patientId);
+    }
+
+    @Override
+    public Patient findByPhone(String phone) {
+        return patientMapper.findByPhone(phone);
+    }
+
+    @Override
+    public Patient login(String phone, String password) {
+        return patientMapper.findByPhoneAndPassword(phone, password);
+    }
+
+    @Override
+    public Patient register(Patient patient) {
+        patientMapper.insertPatientInfo(patient);
         return patient;
+    }
+
+    @Override
+    public int updateAccount(Patient patient) {
+        return patientMapper.updateAccount(patient);
     }
 }

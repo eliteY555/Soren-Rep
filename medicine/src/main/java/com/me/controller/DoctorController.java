@@ -1,10 +1,13 @@
 package com.me.controller;
 
 import com.me.common.Result;
+import com.me.common.ResultEnum;
 import com.me.pojo.Doctor;
 import com.me.pojo.DoctorDTO;
 import com.me.service.DoctorService;
+import com.me.utils.PasswordUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,13 +19,39 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
 
+    // 医生注册
+    @PostMapping("/register")
+    public Result register(@RequestBody Doctor doctor) {
+        try {
+            String password = PasswordUtil.desEncrypt(doctor.getPassword());
+            doctor.setPassword(password);
+            Doctor saved = doctorService.register(doctor);
+            return Result.success(saved);
+        } catch (DataIntegrityViolationException e) {
+            System.out.println("注册约束冲突: " + e.getMessage());
+            return Result.error("用户名或手机号已存在，或必填字段为空");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("注册失败: " + e.getMessage());
+        }
+    }
+
+    // 医生登录
+    @PostMapping("/login")
+    public Result login(@RequestBody Map<String, String> loginData) {
+        String phone = loginData.get("phone");
+        String password = PasswordUtil.desEncrypt(loginData.get("password"));
+        Doctor doctor = doctorService.login(phone, password);
+        if (doctor != null) {
+            return Result.success(doctor);
+        } else {
+            return Result.error(ResultEnum.USERNAME_OR_PASSWORD_ERROR);
+        }
+    }
+
     @PostMapping("/create")
     public Result createDoctorInfo(@RequestBody Doctor doctor) {
         try {
-            if (doctor.getUserId() == null) {
-                return Result.error("用户ID不能为空");
-            }
-            
             int i = doctorService.updateDoctorInfo(doctor);
             if (i > 0) {
                 return Result.success(doctor);
@@ -51,29 +80,20 @@ public class DoctorController {
         }
     }
 
-    @GetMapping("/get/{userId}")
-    public Result getDoctorByUserId(@PathVariable("userId") Integer userId) {
+    @GetMapping("/get/{doctorId}")
+    public Result getDoctorById(@PathVariable("doctorId") Integer doctorId) {
         try {
-            System.out.println("正在获取医生信息，userId: " + userId);
-            if (userId == null) {
-                System.out.println("获取医生信息失败: userId为空");
-                return Result.error("用户ID不能为空");
+            if (doctorId == null) {
+                return Result.error("医生ID不能为空");
             }
-            
-            Doctor doctor = doctorService.getDoctorByUserId(userId);
-            
+            Doctor doctor = doctorService.getDoctorById(doctorId);
             if (doctor == null) {
-                System.out.println("未找到医生信息，userId: " + userId);
-                // 如果医生信息为空，则返回空对象而不是null
                 doctor = new Doctor();
-                doctor.setUserId(userId);
-            } else {
-                System.out.println("成功获取医生信息: " + doctor);
+                doctor.setDoctorId(doctorId);
             }
-            
             return Result.success(doctor);
         } catch (Exception e) {
-            System.out.println("获取医生信息异常，userId: " + userId);
+            System.out.println("获取医生信息异常，doctorId: " + doctorId);
             e.printStackTrace();
             return Result.error("查询失败，请稍后再试: " + e.getMessage());
         }

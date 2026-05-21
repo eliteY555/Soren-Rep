@@ -78,8 +78,7 @@
 </template>
 
 <script>
-import { findPassword, updatePassword } from "@/api/user";
-import { Encrypt } from "@/utils/secret";
+import { findPassword } from "@/api/auth";
 export default {
   components: {},
   data() {
@@ -123,23 +122,15 @@ export default {
   methods: {
     next() {
       this.$refs.ruleFormRef.validate(async (valid) => {
-        if (!valid) return; // 如果表单验证失败，直接返回
+        if (!valid) return;
 
         this.loading = true;
         try {
           if (this.active === 0) {
-            // 第一步：根据用户名查找用户
+            // 第一步：根据手机号验证身份
             const res = await findPassword(this.ruleForm.identity);
             if (res) {
-              this.active++; // 进行到下一步
-            }
-          } else if (this.active === 1) {
-            // 第二步：重置密码
-            // 对密码进行加密
-            const password = Encrypt(this.ruleForm.password);
-            const res = await updatePassword({...this.ruleForm, password});
-            if (res) {
-              this.active++; // 进行到下一步
+              this.active = 2; // 直接跳到完成，提示联系管理员重置密码
             }
           }
         } catch (error) {
@@ -150,7 +141,6 @@ export default {
         }
       });
 
-      // 重置步骤
       if (this.active > 2) this.active = 0;
     },
   },

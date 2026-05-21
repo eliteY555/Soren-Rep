@@ -6,6 +6,7 @@ import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.pinecone.PineconeEmbeddingStore;
 import dev.langchain4j.store.embedding.pinecone.PineconeServerlessIndexConfig;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,11 +20,14 @@ public class EmbeddingStoreConfig {
     @Autowired
     private EmbeddingModel embeddingModel;
 
+    @Value("${pinecone.api-key}")
+    private String pineconeApiKey;
+
     @Bean
     public EmbeddingStore<TextSegment> setEmbeddingStore(){
 
         return PineconeEmbeddingStore.builder()
-                .apiKey(System.getenv("PINECONE-KEY"))
+                .apiKey(pineconeApiKey)
                 .index("medicine-index")
                 .nameSpace("medicine-namespace1")
                 .createIndex(PineconeServerlessIndexConfig.builder()

@@ -211,7 +211,7 @@
 </template>
 
 <script>
-import { update } from "@/api/user";
+import { update } from "@/api/auth";
 import { Encrypt } from "@/utils/secret";
 import cities from "@/assets/data/cities.js";
 import { updatePatientInfo, getPatientInfo, createPatientInfo } from "@/api/patient"

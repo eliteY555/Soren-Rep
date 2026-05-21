@@ -35,14 +35,17 @@ langchain4j:
   community:
     dashscope:
       chat-model:
-        api-key: ${QWEN-KEY}
+        api-key: ${QWEN_KEY}
         model-name: qwen-max
       streaming-chat-model:
-        api-key: ${QWEN-KEY}
+        api-key: ${QWEN_KEY}
         model-name: qwen-max
       embedding-model:
         model-name: text-embedding-v3
-        api-key: ${QWEN-KEY}
+        api-key: ${QWEN_KEY}
+
+pinecone:
+  api-key: ${PINECONE_KEY}
 logging:
   level:
     root: info

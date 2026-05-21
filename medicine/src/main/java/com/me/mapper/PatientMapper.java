@@ -2,12 +2,19 @@ package com.me.mapper;
 
 import com.me.pojo.Patient;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface PatientMapper {
-    int updatePatientInfo(Patient patient);
-
     int insertPatientInfo(Patient patient);
 
-    Patient getPatientByUserId(Integer userId);
+    int updatePatientInfo(Patient patient);
+
+    Patient getPatientById(Integer patientId);
+
+    Patient findByPhone(String phone);
+
+    Patient findByPhoneAndPassword(@Param("phone") String phone, @Param("password") String password);
+
+    int updateAccount(Patient patient);
 }

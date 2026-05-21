@@ -22,8 +22,8 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public Doctor getDoctorByUserId(Integer userId) {
-        return doctorMapper.getDoctorByUserId(userId);
+    public Doctor getDoctorById(Integer doctorId) {
+        return doctorMapper.getDoctorById(doctorId);
     }
 
     @Override
@@ -33,10 +33,8 @@ public class DoctorServiceImpl implements DoctorService {
 
     @Override
     public Map<String, Object> queryDoctorList(DoctorDTO doctorDTO) {
-        // 计算偏移量
         int offset = (doctorDTO.getPage() - 1) * doctorDTO.getPageSize();
 
-        // 构建查询参数
         Map<String, Object> params = new HashMap<>();
         params.put("cityName", doctorDTO.getCityName());
         params.put("hospitalName", doctorDTO.getHospitalName());
@@ -44,7 +42,6 @@ public class DoctorServiceImpl implements DoctorService {
         params.put("offset", offset);
         params.put("pageSize", doctorDTO.getPageSize());
 
-        // 查询数据
         List<Doctor> doctorList = doctorMapper.selectDoctorList(params);
         int total = doctorMapper.countDoctorList(params);
 
@@ -52,5 +49,30 @@ public class DoctorServiceImpl implements DoctorService {
         result.put("total", total);
         result.put("doctorList", doctorList);
         return result;
+    }
+
+    @Override
+    public Doctor findByPhone(String phone) {
+        return doctorMapper.findByPhone(phone);
+    }
+
+    @Override
+    public Doctor login(String phone, String password) {
+        return doctorMapper.findByPhoneAndPassword(phone, password);
+    }
+
+    @Override
+    public Doctor register(Doctor doctor) {
+        doctorMapper.updateDoctorInfo(doctor);
+        Doctor saved = doctorMapper.findByPhone(doctor.getPhone());
+        if (saved != null) {
+            return saved;
+        }
+        return doctor;
+    }
+
+    @Override
+    public int updateAccount(Doctor doctor) {
+        return doctorMapper.updateAccount(doctor);
     }
 }
