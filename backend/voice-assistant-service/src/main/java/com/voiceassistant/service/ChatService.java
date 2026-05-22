@@ -11,6 +11,8 @@ import com.voiceassistant.repo.mongo.entity.ChatSession.MessageEntry;
 import com.voiceassistant.repo.mongo.repository.ChatSessionRepository;
 import com.voiceassistant.repo.mysql.entity.ProviderConfig;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
 import dev.langchain4j.model.StreamingResponseHandler;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.model.output.Response;
@@ -73,11 +75,14 @@ public class ChatService {
             StreamingChatLanguageModel model = modelFactory
                     .getOrCreateStreamingModel(provider, decryptedApiKey);
 
+            // Build conversation history (last 20 messages for context)
+            List<dev.langchain4j.data.message.ChatMessage> history = buildHistory(session, promptContent);
+
             StringBuilder fullResponse = new StringBuilder();
             String sessionId = session.getId();
             String providerName = provider.getName();
 
-            model.generate(promptContent, new StreamingResponseHandler<AiMessage>() {
+            model.generate(history, new StreamingResponseHandler<AiMessage>() {
                 @Override
                 public void onNext(String token) {
                     fullResponse.append(token);
@@ -144,6 +149,32 @@ public class ChatService {
     }
 
     // --- private helpers ---
+
+    /**
+     * Build conversation history from session messages plus the current prompt.
+     * Keeps last 20 messages to stay within context window limits.
+     */
+    private List<dev.langchain4j.data.message.ChatMessage> buildHistory(
+            ChatSession session, String currentPrompt) {
+        List<dev.langchain4j.data.message.ChatMessage> history = new ArrayList<>();
+
+        // Take last 20 messages from session (excluding the just-saved user message = last one)
+        List<MessageEntry> pastMessages = session.getMessages();
+        int start = Math.max(0, pastMessages.size() - 21); // -21 to leave room for current
+        for (int i = start; i < pastMessages.size() - 1; i++) { // exclude last (just saved)
+            MessageEntry m = pastMessages.get(i);
+            if ("USER".equals(m.getRole())) {
+                history.add(UserMessage.from(m.getContent()));
+            } else if ("ASSISTANT".equals(m.getRole())) {
+                history.add(AiMessage.from(m.getContent()));
+            }
+        }
+
+        // Add current prompt
+        history.add(UserMessage.from(currentPrompt));
+
+        return history;
+    }
 
     private ChatSession getOrCreateSession(String sessionId) {
         if (sessionId != null) {
