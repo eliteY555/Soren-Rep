@@ -77,6 +77,7 @@ export const useChatStore = defineStore('chat', () => {
   async function switchSession(sessionId) {
     currentSessionId.value = sessionId
     messages.value = await api.getSessionMessages(sessionId)
+    sessionStorage.setItem('ai-active-session', sessionId)
     broadcast('session-switched')
   }
 

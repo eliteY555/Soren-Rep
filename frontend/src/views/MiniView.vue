@@ -1,5 +1,18 @@
 <template>
   <div class="mini-root">
+    <!-- 标题栏 -->
+    <header class="mini-bar">
+      <span class="mini-bar-brand">◈ AI 助手</span>
+      <span v-if="configStore.activeProviderName" class="mini-bar-chip">{{ configStore.activeProviderName }}</span>
+      <span v-if="configStore.chatMode === 'RAG'" class="mini-bar-chip mode">知识库</span>
+      <button class="mini-back-btn" @click="goBack" title="返回主窗口">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+        </svg>
+        <span>返回主窗口</span>
+      </button>
+    </header>
+
     <!-- 消息区域 -->
     <div class="mini-chat">
       <div v-if="chatStore.messages.length === 0" class="mini-empty">
@@ -64,8 +77,11 @@ onMounted(async () => {
   await configStore.loadProviders()
   await chatStore.loadSessions()
 
-  // Request sync from main window — chatStore's BroadcastChannel handles the rest
-  chatStore.broadcast('mini-ready')
+  // 优先从 sessionStorage 同步当前会话（可靠，无竞态）
+  const savedId = sessionStorage.getItem('ai-active-session')
+  if (savedId) {
+    await chatStore.switchSession(savedId)
+  }
 })
 
 // Scroll to bottom
@@ -93,6 +109,14 @@ function sendText() {
   if (!content) return
   textInput.value = ''
   chatStore.sendMessage(content, configStore.chatMode, configStore.activeProviderId)
+}
+
+function goBack() {
+  // 关闭弹窗，聚焦主窗口
+  if (window.opener) {
+    window.opener.focus()
+  }
+  window.close()
 }
 </script>
 
@@ -140,6 +164,27 @@ body {
 <style scoped>
 .mini-root { display: flex; flex-direction: column; height: 100vh; background: var(--bg-primary); }
 
+/* Title bar */
+.mini-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 12px; height: 34px; flex-shrink: 0;
+  background: var(--bg-secondary); border-bottom: 1px solid var(--border);
+}
+.mini-bar-brand { font-size: 12px; font-weight: 700; color: var(--text-secondary); }
+.mini-bar-chip {
+  font-size: 10px; padding: 1px 6px; border-radius: 8px;
+  background: var(--bg-hover); color: var(--text-muted);
+}
+.mini-bar-chip.mode { background: rgba(34,197,94,0.15); color: var(--accent); }
+.mini-back-btn {
+  display: flex; align-items: center; gap: 4px; margin-left: auto;
+  padding: 3px 8px; background: transparent; border: 1px solid var(--border);
+  border-radius: 4px; color: var(--text-muted); cursor: pointer;
+  font-size: 11px; font-family: inherit; transition: all 0.15s ease;
+}
+.mini-back-btn:hover { background: var(--bg-hover); color: var(--accent); border-color: var(--accent); }
+
+/* Chat */
 .mini-chat { flex: 1; overflow-y: auto; padding: 10px 12px; }
 .mini-empty { text-align: center; padding-top: 35%; opacity: 0.5; }
 .mini-empty-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
