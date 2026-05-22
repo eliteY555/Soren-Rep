@@ -44,36 +44,41 @@ export const useChatStore = defineStore('chat', () => {
     }
 
     const userMsg = { role: 'USER', content, timestamp: new Date().toISOString() }
-    messages.value.push(userMsg)
+    messages.value = [...messages.value, userMsg]
 
     const assistantMsg = { role: 'ASSISTANT', content: '', timestamp: new Date().toISOString(), streaming: true }
-    messages.value.push(assistantMsg)
+    messages.value = [...messages.value, assistantMsg]
 
     isStreaming.value = true
     streamingContent.value = ''
+    const aiIndex = messages.value.length - 1
 
     await api.sendMessageStream(
       { sessionId: currentSessionId.value, content, mode, providerId },
       {
         onToken(token) {
           streamingContent.value += token
-          const last = messages.value[messages.value.length - 1]
-          if (last) last.content = streamingContent.value
+          // Replace entire object to force Vue reactivity
+          const arr = [...messages.value]
+          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
+          messages.value = arr
         },
         onDone() {
-          const last = messages.value[messages.value.length - 1]
-          if (last) delete last.streaming
+          // Replace to remove streaming flag
+          const arr = [...messages.value]
+          const item = { ...arr[aiIndex] }
+          delete item.streaming
+          arr[aiIndex] = item
+          messages.value = arr
           isStreaming.value = false
           streamingContent.value = ''
           loadSessions()
         },
         onError(err) {
           console.error('Stream error:', err)
-          const last = messages.value[messages.value.length - 1]
-          if (last) {
-            last.content = '请求失败: ' + err.message
-            delete last.streaming
-          }
+          const arr = [...messages.value]
+          arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message, streaming: undefined }
+          messages.value = arr
           isStreaming.value = false
         }
       }
