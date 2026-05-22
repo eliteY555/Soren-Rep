@@ -1,9 +1,14 @@
 <template>
-  <HomeView />
+  <MiniView v-if="isMini" />
+  <HomeView v-else />
 </template>
 
 <script setup>
+import { ref } from 'vue'
 import HomeView from './views/HomeView.vue'
+import MiniView from './views/MiniView.vue'
+
+const isMini = ref(window.location.search.includes('mini=1'))
 </script>
 
 <style>

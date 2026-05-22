@@ -2,6 +2,12 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as api from '../services/api'
 
+// BroadcastChannel for cross-window sync (main window ↔ popup)
+let syncChannel = null
+try {
+  syncChannel = new BroadcastChannel('ai-assistant-sync')
+} catch (_) { /* BroadcastChannel not supported */ }
+
 export const useChatStore = defineStore('chat', () => {
   const sessions = ref([])
   const currentSessionId = ref(null)
@@ -13,6 +19,44 @@ export const useChatStore = defineStore('chat', () => {
     sessions.value.find(s => s.id === currentSessionId.value)
   )
 
+  // --- Broadcast sync helpers ---
+  function broadcast(type) {
+    if (syncChannel) {
+      syncChannel.postMessage({ type, sessionId: currentSessionId.value })
+    }
+  }
+
+  async function handleSyncEvent(event) {
+    const { type, sessionId } = event.data
+    try {
+      switch (type) {
+        case 'message-sent':
+        case 'force-refresh':
+          if (currentSessionId.value) {
+            messages.value = await api.getSessionMessages(currentSessionId.value)
+          }
+          break
+        case 'session-switched':
+          if (sessionId && currentSessionId.value !== sessionId) {
+            currentSessionId.value = sessionId
+            messages.value = await api.getSessionMessages(sessionId)
+          }
+          break
+        case 'session-deleted':
+          await loadSessions()
+          break
+      }
+    } catch (e) {
+      console.warn('Sync error:', e)
+    }
+  }
+
+  // Listen for sync from other window
+  if (syncChannel) {
+    syncChannel.onmessage = handleSyncEvent
+  }
+
+  // --- Actions ---
   async function loadSessions() {
     sessions.value = await api.listSessions()
   }
@@ -27,6 +71,7 @@ export const useChatStore = defineStore('chat', () => {
   async function switchSession(sessionId) {
     currentSessionId.value = sessionId
     messages.value = await api.getSessionMessages(sessionId)
+    broadcast('session-switched')
   }
 
   async function deleteCurrentSession(id) {
@@ -36,6 +81,7 @@ export const useChatStore = defineStore('chat', () => {
       currentSessionId.value = null
       messages.value = []
     }
+    broadcast('session-deleted')
   }
 
   async function sendMessage(content, mode, providerId) {
@@ -58,13 +104,11 @@ export const useChatStore = defineStore('chat', () => {
       {
         onToken(token) {
           streamingContent.value += token
-          // Replace entire object to force Vue reactivity
           const arr = [...messages.value]
           arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
           messages.value = arr
         },
         onDone() {
-          // Replace to remove streaming flag
           const arr = [...messages.value]
           const item = { ...arr[aiIndex] }
           delete item.streaming
@@ -73,6 +117,7 @@ export const useChatStore = defineStore('chat', () => {
           isStreaming.value = false
           streamingContent.value = ''
           loadSessions()
+          broadcast('message-sent')
         },
         onError(err) {
           console.error('Stream error:', err)
@@ -88,6 +133,6 @@ export const useChatStore = defineStore('chat', () => {
   return {
     sessions, currentSessionId, messages, isStreaming, streamingContent,
     currentSession, loadSessions, createNewSession, switchSession,
-    deleteCurrentSession, sendMessage
+    deleteCurrentSession, sendMessage, broadcast
   }
 })
