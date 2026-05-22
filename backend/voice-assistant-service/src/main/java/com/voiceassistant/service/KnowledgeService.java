@@ -70,6 +70,7 @@ public class KnowledgeService {
         docInfo.setFileSize((long) fileBytes.length);
         docInfo.setFileType(getFileType(fileName));
         docInfo.setChunkCount(segments.size());
+        docInfo.setPineconeDocId(docId);   // link MySQL record ↔ Pinecone vectors
         DocumentInfo saved = docRepo.save(docInfo);
 
         log.info("Document '{}' ingested: {} chunks → Pinecone", fileName, segments.size());
@@ -105,7 +106,18 @@ public class KnowledgeService {
     }
 
     public void deleteDocument(Long id) {
+        DocumentInfo doc = docRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Document not found: " + id));
+        // Delete vectors from Pinecone (if docId exists — old records may not have one)
+        if (doc.getPineconeDocId() != null && !doc.getPineconeDocId().isBlank()) {
+            pineconeClient.deleteByDocId(doc.getPineconeDocId());
+        } else {
+            log.warn("Document '{}' has no pineconeDocId — vectors may be orphaned", doc.getFileName());
+        }
+        // Then delete metadata from MySQL
         docRepo.deleteById(id);
+        log.info("Document '{}' deleted (Pinecone docId={}, {} chunks)",
+                doc.getFileName(), doc.getPineconeDocId(), doc.getChunkCount());
     }
 
     /**

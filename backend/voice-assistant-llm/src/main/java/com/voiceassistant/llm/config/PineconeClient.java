@@ -124,6 +124,37 @@ public class PineconeClient {
         }
     }
 
+    /**
+     * Delete all vectors matching a metadata filter (e.g. by docId).
+     */
+    public void deleteByDocId(String docId) {
+        try {
+            String body = objectMapper.writeValueAsString(Map.of(
+                    "filter", Map.of("docId", Map.of("$eq", docId))
+            ));
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(indexHost + "/vectors/delete"))
+                    .header("Api-Key", apiKey)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(body))
+                    .timeout(Duration.ofSeconds(30))
+                    .build();
+
+            HttpResponse<String> resp = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() != 200 && resp.statusCode() != 202) {
+                log.error("Pinecone delete failed: HTTP {} body={}", resp.statusCode(),
+                        resp.body().length() > 300 ? resp.body().substring(0, 300) : resp.body());
+                throw new RuntimeException("Pinecone delete failed: HTTP " + resp.statusCode());
+            }
+            log.info("Pinecone vectors deleted for docId={}", docId);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Pinecone delete error", e);
+            throw new RuntimeException("Pinecone delete failed", e);
+        }
+    }
+
     // --- DTOs ---
 
     @Data

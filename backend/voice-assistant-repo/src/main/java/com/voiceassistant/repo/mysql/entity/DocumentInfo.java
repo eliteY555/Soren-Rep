@@ -25,6 +25,9 @@ public class DocumentInfo {
     @Column(nullable = false)
     private Integer chunkCount;
 
+    @Column(nullable = false, length = 64)
+    private String pineconeDocId;       // links to Pinecone vectors via metadata.docId
+
     @Column(nullable = false)
     private LocalDateTime uploadedAt;
 
