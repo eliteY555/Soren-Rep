@@ -1,7 +1,7 @@
 <template>
-  <div class="home">
+  <div :class="['home', { mini: isMini }]">
     <!-- Sidebar -->
-    <aside class="sidebar">
+    <aside v-show="!isMini" class="sidebar">
       <div class="sidebar-brand">
         <span class="brand-icon">◈</span>
         <span class="brand-text">AI 助手</span>
@@ -29,7 +29,7 @@
 
     <!-- Main area -->
     <main class="main">
-      <header class="topbar">
+      <header v-show="!isMini" class="topbar">
         <div class="topbar-left">
           <ProviderSelector
             :providers="configStore.providers"
@@ -40,9 +40,23 @@
         </div>
         <div class="topbar-right">
           <el-button size="small" text @click="toggleSpeechMode" class="mode-toggle">
-            {{ speech.mode.value === 'ptt' ? '🎤 实时模式' : '🎤 按键模式' }}
+            {{ speech.mode.value === 'ptt' ? '实时模式' : '按键模式' }}
           </el-button>
           <el-button size="small" text :icon="Setting" @click="showProviderDialog = true" class="settings-btn" />
+        </div>
+      </header>
+
+      <!-- Mini mode: compact title bar -->
+      <header v-show="isMini" class="mini-bar">
+        <span class="mini-bar-brand">◈ AI 助手</span>
+        <div class="mini-bar-actions">
+          <span v-if="configStore.activeProviderName" class="mini-bar-provider">{{ configStore.activeProviderName }}</span>
+          <span v-if="configStore.chatMode === 'RAG'" class="mini-bar-mode">知识库</span>
+          <button class="mini-expand-btn" @click="isMini = false" title="展开完整窗口">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            </svg>
+          </button>
         </div>
       </header>
 
@@ -79,6 +93,20 @@
               <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
             </svg>
           </button>
+
+          <button
+            class="mini-toggle-btn"
+            @click="isMini = !isMini"
+            :title="isMini ? '展开完整窗口' : '小窗模式'"
+          >
+            <svg v-if="!isMini" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="4 8 4 4 8 4"/><line x1="20" y1="4" x2="12" y2="12"/>
+              <polyline points="4 20 4 16"/><polyline points="20 20 20 16"/>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            </svg>
+          </button>
         </div>
 
         <div v-if="speech.transcript.value || speech.interimTranscript.value" class="transcript-preview">
@@ -95,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { Setting } from '@element-plus/icons-vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
@@ -116,6 +144,7 @@ const textInput = ref('')
 const sidebarTab = ref('chat')
 const showProviderDialog = ref(false)
 const inputRef = ref(null)
+const isMini = ref(false)
 
 onMounted(async () => {
   await configStore.loadProviders()
@@ -191,6 +220,27 @@ function sendTranscript() {
 .settings-btn { color: var(--text-muted) !important; }
 .settings-btn:hover { color: var(--text-primary) !important; }
 
+/* Mini mode bar */
+.mini-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 14px; flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+}
+.mini-bar-brand { font-size: 13px; font-weight: 600; color: var(--text-secondary); }
+.mini-bar-actions { display: flex; align-items: center; gap: 8px; }
+.mini-bar-provider { font-size: 11px; color: var(--text-muted); }
+.mini-bar-mode {
+  font-size: 10px; padding: 1px 6px; border-radius: 8px;
+  background: rgba(34,197,94,0.15); color: var(--accent);
+}
+.mini-expand-btn {
+  width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;
+  background: transparent; border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text-muted); cursor: pointer; transition: all 0.15s ease;
+}
+.mini-expand-btn:hover { background: var(--bg-hover); color: var(--accent); border-color: var(--accent); }
+
 /* Input area */
 .input-area { padding: 16px 24px 20px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--bg-secondary); }
 .input-row { display: flex; align-items: center; gap: 12px; }
@@ -216,6 +266,22 @@ function sendTranscript() {
 .send-btn.active { background: var(--accent); color: #fff; }
 .send-btn.active:hover { background: var(--accent-hover); }
 .send-btn:disabled { cursor: not-allowed; opacity: 0.4; }
+
+/* Mini toggle button */
+.mini-toggle-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md); border: none;
+  cursor: pointer; transition: all 0.2s ease;
+  background: var(--bg-input); color: var(--text-muted);
+}
+.mini-toggle-btn:hover { background: var(--bg-hover); color: var(--accent); }
+
+/* Mini mode layout tweaks */
+.home.mini .input-area { padding: 10px 14px 14px; }
+.home.mini .text-input { font-size: 13px; padding: 10px 14px; }
+.home.mini .send-btn { width: 38px; height: 38px; }
+.home.mini .mini-toggle-btn { width: 38px; height: 38px; }
 
 /* Transcript preview */
 .transcript-preview {

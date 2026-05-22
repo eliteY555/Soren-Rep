@@ -1,11 +1,16 @@
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import * as api from '../services/api'
 
 export const useConfigStore = defineStore('config', () => {
   const providers = ref([])
   const activeProviderId = ref(null)
   const chatMode = ref('DIRECT')
+
+  const activeProviderName = computed(() => {
+    const active = providers.value.find(p => p.id === activeProviderId.value)
+    return active ? active.name : ''
+  })
 
   async function loadProviders() {
     providers.value = await api.listProviders()
@@ -39,7 +44,7 @@ export const useConfigStore = defineStore('config', () => {
   }
 
   return {
-    providers, activeProviderId, chatMode,
+    providers, activeProviderId, activeProviderName, chatMode,
     loadProviders, addProvider, updateProvider,
     deleteProvider, activateProvider, setChatMode
   }
