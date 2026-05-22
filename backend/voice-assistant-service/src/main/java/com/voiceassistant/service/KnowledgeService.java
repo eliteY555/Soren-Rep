@@ -1,13 +1,17 @@
 package com.voiceassistant.service;
 
 import com.voiceassistant.llm.config.PineconeClient;
+import com.voiceassistant.llm.config.PineconeClient.VectorEntry;
+import com.voiceassistant.llm.config.PineconeClient.Match;
 import com.voiceassistant.repo.mysql.entity.DocumentInfo;
 import com.voiceassistant.repo.mysql.repository.DocumentInfoRepository;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.parser.apache.pdfbox.ApachePdfBoxDocumentParser;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
+import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
+import dev.langchain4j.model.embedding.EmbeddingModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -25,33 +29,39 @@ public class KnowledgeService {
 
     private final DocumentInfoRepository docRepo;
     private final PineconeClient pineconeClient;
+    private final EmbeddingModel embeddingModel;
 
     private static final int CHUNK_SIZE = 500;
     private static final int CHUNK_OVERLAP = 50;
     private static final int MAX_SEARCH_RESULTS = 5;
 
     public DocumentInfo uploadDocument(String fileName, byte[] fileBytes) {
-        // 1. Parse document content
         String content = extractContent(fileName, fileBytes);
-
-        // 2. Split into chunks
         Document document = Document.from(content);
         DocumentSplitter splitter = DocumentSplitters.recursive(CHUNK_SIZE, CHUNK_OVERLAP);
         List<TextSegment> segments = splitter.split(document);
         log.info("Document '{}' split into {} chunks", fileName, segments.size());
 
-        // 3. Send chunks to Pinecone (Pinecone embeds server-side via integrated embedding)
-        String docId = "doc-" + UUID.randomUUID();
-        List<PineconeClient.Record> records = segments.stream()
-                .map(seg -> PineconeClient.Record.builder()
-                        .id(docId + "-" + segments.indexOf(seg))
-                        .text(seg.text())
-                        .metadata(Map.of("docId", docId, "fileName", fileName))
-                        .build())
-                .toList();
-        pineconeClient.upsert(records);
+        // Embed all chunks client-side
+        List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
 
-        // 4. Save metadata to MySQL
+        // Build vector entries with text stored in metadata for retrieval
+        String docId = "doc-" + UUID.randomUUID();
+        List<VectorEntry> vectors = new java.util.ArrayList<>();
+        for (int i = 0; i < segments.size(); i++) {
+            float[] values = new float[embeddings.get(i).vector().length];
+            for (int j = 0; j < values.length; j++) {
+                values[j] = embeddings.get(i).vector()[j];
+            }
+            vectors.add(new VectorEntry(
+                    docId + "-" + i,
+                    values,
+                    Map.of("docId", docId, "fileName", fileName, "text", segments.get(i).text())
+            ));
+        }
+
+        pineconeClient.upsert(vectors);
+
         DocumentInfo docInfo = new DocumentInfo();
         docInfo.setFileName(fileName);
         docInfo.setFileSize((long) fileBytes.length);
@@ -59,14 +69,20 @@ public class KnowledgeService {
         docInfo.setChunkCount(segments.size());
         DocumentInfo saved = docRepo.save(docInfo);
 
-        log.info("Document '{}' ingested: {} chunks → Pinecone (server-side embedding)", fileName, segments.size());
+        log.info("Document '{}' ingested: {} chunks → Pinecone", fileName, segments.size());
         return saved;
     }
 
     public List<String> search(String query) {
-        List<PineconeClient.Hit> hits = pineconeClient.search(query, MAX_SEARCH_RESULTS);
-        return hits.stream()
-                .map(PineconeClient.Hit::getText)
+        Embedding queryEmbedding = embeddingModel.embed(query).content();
+        float[] queryVector = new float[queryEmbedding.vector().length];
+        for (int i = 0; i < queryVector.length; i++) {
+            queryVector[i] = queryEmbedding.vector()[i];
+        }
+
+        List<Match> matches = pineconeClient.query(queryVector, MAX_SEARCH_RESULTS);
+        return matches.stream()
+                .map(Match::getText)
                 .filter(t -> t != null)
                 .toList();
     }
@@ -76,9 +92,6 @@ public class KnowledgeService {
     }
 
     public void deleteDocument(Long id) {
-        DocumentInfo docInfo = docRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Document not found: " + id));
-        log.info("Deleting document '{}' — vectors managed by Pinecone", docInfo.getFileName());
         docRepo.deleteById(id);
     }
 
@@ -96,7 +109,6 @@ public class KnowledgeService {
         }
         context.append("用户问题：").append(query);
         context.append("\n\n请基于以上参考资料回答问题。如果参考资料中没有相关信息，请如实告知。");
-
         return context.toString();
     }
 
