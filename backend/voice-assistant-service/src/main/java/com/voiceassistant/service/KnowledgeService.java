@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,21 +32,23 @@ public class KnowledgeService {
     private final PineconeClient pineconeClient;
     private final EmbeddingModel embeddingModel;
 
-    private static final int CHUNK_SIZE = 500;
-    private static final int CHUNK_OVERLAP = 50;
-    private static final int MAX_SEARCH_RESULTS = 5;
+    // Larger chunks for better context preservation
+    private static final int CHUNK_SIZE = 800;
+    private static final int CHUNK_OVERLAP = 120;
+    private static final int MAX_SEARCH_RESULTS = 8;
+    // Minimum similarity score to consider a result relevant (Pinecone cosine)
+    private static final double MIN_SCORE_THRESHOLD = 0.35;
 
     public DocumentInfo uploadDocument(String fileName, byte[] fileBytes) {
         String content = extractContent(fileName, fileBytes);
         Document document = Document.from(content);
         DocumentSplitter splitter = DocumentSplitters.recursive(CHUNK_SIZE, CHUNK_OVERLAP);
         List<TextSegment> segments = splitter.split(document);
-        log.info("Document '{}' split into {} chunks", fileName, segments.size());
+        log.info("Document '{}' split into {} chunks (size={}, overlap={})",
+                fileName, segments.size(), CHUNK_SIZE, CHUNK_OVERLAP);
 
-        // Embed all chunks client-side
         List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
 
-        // Build vector entries with text stored in metadata for retrieval
         String docId = "doc-" + UUID.randomUUID();
         List<VectorEntry> vectors = new java.util.ArrayList<>();
         for (int i = 0; i < segments.size(); i++) {
@@ -73,7 +76,10 @@ public class KnowledgeService {
         return saved;
     }
 
-    public List<String> search(String query) {
+    /**
+     * Search knowledge base with score filtering and deduplication.
+     */
+    public List<ChunkResult> searchWithScores(String query) {
         Embedding queryEmbedding = embeddingModel.embed(query).content();
         float[] queryVector = new float[queryEmbedding.vector().length];
         for (int i = 0; i < queryVector.length; i++) {
@@ -82,8 +88,15 @@ public class KnowledgeService {
 
         List<Match> matches = pineconeClient.query(queryVector, MAX_SEARCH_RESULTS);
         return matches.stream()
-                .map(Match::getText)
-                .filter(t -> t != null)
+                .filter(m -> m.getScore() >= MIN_SCORE_THRESHOLD)
+                .filter(m -> m.getText() != null && !m.getText().isBlank())
+                .map(m -> new ChunkResult(m.getText(), m.getScore()))
+                .collect(Collectors.toList());
+    }
+
+    public List<String> search(String query) {
+        return searchWithScores(query).stream()
+                .map(ChunkResult::text)
                 .toList();
     }
 
@@ -95,22 +108,64 @@ public class KnowledgeService {
         docRepo.deleteById(id);
     }
 
+    /**
+     * Build RAG prompt that ENHANCES rather than RESTRICTS the LLM.
+     *
+     * Key principles:
+     * 1. Knowledge base content is PRIMARY reference, not the ONLY source
+     * 2. LLM should synthesize KB content with its own knowledge for completeness
+     * 3. If KB has relevant info → prioritize it, expand with reasoning
+     * 4. If KB has no relevant info → use general knowledge, mention KB gap
+     * 5. Ask for structured, complete answers — not just quotes
+     */
     public String buildRagPrompt(String query) {
-        List<String> results = search(query);
+        List<ChunkResult> results = searchWithScores(query);
+
         if (results.isEmpty()) {
-            return query;
+            // No relevant KB content — let LLM answer freely but mention the gap
+            return """
+                    用户正在使用知识库增强模式提问，但知识库中未检索到与当前问题高度相关的内容。
+                    请直接根据你的知识回答以下问题，并在回答开头简要说明"知识库中暂未找到相关内容，以下为通用知识回答"。
+
+                    用户问题：%s
+                    """.formatted(query);
         }
 
-        StringBuilder context = new StringBuilder();
-        context.append("以下是相关的知识库内容，请基于这些内容回答问题：\n\n");
+        // Build high-quality context from retrieved chunks
+        StringBuilder kb = new StringBuilder();
+        kb.append("【知识库参考资料】\n");
         for (int i = 0; i < results.size(); i++) {
-            context.append("【参考资料 ").append(i + 1).append("】\n");
-            context.append(results.get(i)).append("\n\n");
+            ChunkResult r = results.get(i);
+            kb.append("── 片段 ").append(i + 1)
+              .append(" (相关度: ").append(String.format("%.0f%%", r.score() * 100)).append(") ──\n");
+            kb.append(r.text()).append("\n\n");
         }
-        context.append("用户问题：").append(query);
-        context.append("\n\n请基于以上参考资料回答问题。如果参考资料中没有相关信息，请如实告知。");
-        return context.toString();
+
+        // Prompt that encourages synthesis, completeness, and critical thinking
+        String instruction = """
+                你是一个智能助手，当前处于"知识库增强模式"。以下是知识库中检索到的参考资料：
+
+                %s
+
+                请根据以上参考资料和你的知识，回答用户问题。要求：
+                1. **优先使用参考资料**：如果参考资料包含相关信息，以它为主要依据
+                2. **补充完整回答**：如果参考资料只覆盖了部分内容，用你的知识补充完整，使回答全面、连贯
+                3. **区分来源**：如果某个信息来自参考资料，可以标注"根据知识库…"；补充的内容可以说"另外…"
+                4. **结构化回答**：使用清晰的段落、列表或小标题组织内容，确保可读性
+                5. **主动扩展**：在回答完核心问题后，可以简要补充相关的背景知识或注意事项
+
+                用户问题：%s
+                """.formatted(kb.toString(), query);
+
+        return instruction;
     }
+
+    /**
+     * A retrieved chunk with its similarity score.
+     */
+    public record ChunkResult(String text, double score) {}
+
+    // --- File parsing helpers ---
 
     private String extractContent(String fileName, byte[] fileBytes) {
         String type = getFileType(fileName);
