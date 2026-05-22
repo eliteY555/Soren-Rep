@@ -21,7 +21,7 @@
       </div>
       <div class="mini-messages" v-else>
         <div v-for="(msg, idx) in chatStore.messages" :key="idx" class="mini-msg">
-          <div :class="['mini-bubble', msg.role === 'USER' ? 'user' : 'ai']" v-html="renderContent(msg.content)" />
+          <div :class="['mini-bubble', msg.role === 'USER' ? 'user' : 'ai']" v-html="renderContent(msg.content, msg.streaming)" />
         </div>
         <div ref="bottomRef" />
       </div>
@@ -63,7 +63,7 @@ import { ref, onMounted, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
 import { useSpeech } from '../composables/useSpeech'
-import { safeMarkdown } from '../marked-setup'
+import { safeMarkdown, safeStreamingMarkdown } from '../marked-setup'
 import VoiceButton from '../components/VoiceButton.vue'
 
 const chatStore = useChatStore()
@@ -99,9 +99,9 @@ watch(() => speech.transcript.value, (val) => {
   if (val) textInput.value = val
 })
 
-function renderContent(content) {
+function renderContent(content, isStreaming) {
   if (!content) return '<span style="color: var(--text-muted); font-style: italic;">思考中…</span>'
-  return safeMarkdown(content)
+  return isStreaming ? safeStreamingMarkdown(content) : safeMarkdown(content)
 }
 
 function sendText() {

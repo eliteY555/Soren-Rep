@@ -46,4 +46,41 @@ export function safeMarkdown(content) {
   }
 }
 
+/**
+ * Streaming-safe markdown render.
+ *
+ * During streaming, the last paragraph is likely incomplete (unclosed bold,
+ * half-written code blocks, orphan `---`). We split on \n\n boundaries:
+ *   - Complete paragraphs → full markdown rendering
+ *   - In-progress final paragraph → escaped plain text
+ *
+ * Once a \n\n appears, the paragraph graduates to markdown on the next token.
+ */
+export function safeStreamingMarkdown(content) {
+  if (!content) return ''
+
+  // Find the last paragraph boundary
+  const lastBreak = content.lastIndexOf('\n\n')
+  if (lastBreak === -1) {
+    // Single paragraph — could be mid-sentence, just escape to avoid artifacts
+    const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return `<p>${escaped}</p>`
+  }
+
+  const complete = content.slice(0, lastBreak)
+  const inProgress = content.slice(lastBreak + 2)
+
+  try {
+    const rendered = marked.parse(complete)
+    if (!inProgress.trim()) return rendered // trailing newlines, no new content yet
+
+    const escaped = inProgress.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return rendered + '\n<p>' + escaped + '</p>'
+  } catch (e) {
+    console.warn('Streaming markdown error:', e.message)
+    const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return escaped.split('\n\n').map(p => `<p>${p}</p>`).join('')
+  }
+}
+
 export default marked
