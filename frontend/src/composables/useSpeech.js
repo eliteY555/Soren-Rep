@@ -36,15 +36,22 @@ export function useSpeech() {
     }
 
     rec.onerror = (event) => {
+      // 'no-speech' and 'aborted' are normal in streaming mode, don't treat as errors
+      if (event.error === 'no-speech' || event.error === 'aborted') {
+        if (mode.value === 'streaming' && isListening.value) {
+          try { rec.start() } catch (e) { /* ignore */ }
+          return
+        }
+      }
       error.value = event.error
       isListening.value = false
     }
 
     rec.onend = () => {
-      isListening.value = false
-      if (mode.value === 'streaming' && recognition) {
-        // In streaming mode, auto-restart if still in streaming mode
-        try { recognition.start() } catch (e) { /* ignore */ }
+      if (mode.value === 'streaming' && isListening.value) {
+        try { rec.start() } catch (e) { isListening.value = false }
+      } else {
+        isListening.value = false
       }
     }
 
@@ -57,7 +64,10 @@ export function useSpeech() {
       return
     }
     error.value = null
-    transcript.value = ''
+    // In PTT mode, clear transcript for fresh start
+    if (mode.value === 'ptt') {
+      transcript.value = ''
+    }
     interimTranscript.value = ''
 
     recognition = createRecognition()
@@ -68,9 +78,9 @@ export function useSpeech() {
   }
 
   function stopListening() {
+    isListening.value = false
     if (recognition) {
       recognition.stop()
-      isListening.value = false
     }
   }
 
@@ -78,6 +88,7 @@ export function useSpeech() {
     mode.value = newMode
     if (recognition) {
       recognition.stop()
+      isListening.value = false
     }
   }
 
@@ -87,6 +98,7 @@ export function useSpeech() {
   }
 
   onUnmounted(() => {
+    isListening.value = false
     if (recognition) recognition.stop()
   })
 
