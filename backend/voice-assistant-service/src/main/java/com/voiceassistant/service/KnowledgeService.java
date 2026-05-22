@@ -1,17 +1,13 @@
 package com.voiceassistant.service;
 
+import com.voiceassistant.llm.config.PineconeClient;
 import com.voiceassistant.repo.mysql.entity.DocumentInfo;
 import com.voiceassistant.repo.mysql.repository.DocumentInfoRepository;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentSplitter;
 import dev.langchain4j.data.document.parser.apache.pdfbox.ApachePdfBoxDocumentParser;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
-import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
-import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
-import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -19,6 +15,7 @@ import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -27,38 +24,34 @@ import java.util.UUID;
 public class KnowledgeService {
 
     private final DocumentInfoRepository docRepo;
-    private final EmbeddingModel embeddingModel;
-    private final EmbeddingStore<TextSegment> embeddingStore;
+    private final PineconeClient pineconeClient;
 
     private static final int CHUNK_SIZE = 500;
     private static final int CHUNK_OVERLAP = 50;
     private static final int MAX_SEARCH_RESULTS = 5;
 
     public DocumentInfo uploadDocument(String fileName, byte[] fileBytes) {
-        // 1. Parse document content from bytes
+        // 1. Parse document content
         String content = extractContent(fileName, fileBytes);
 
-        // 2. Create LangChain4j Document
+        // 2. Split into chunks
         Document document = Document.from(content);
-
-        // 3. Split into chunks
         DocumentSplitter splitter = DocumentSplitters.recursive(CHUNK_SIZE, CHUNK_OVERLAP);
         List<TextSegment> segments = splitter.split(document);
         log.info("Document '{}' split into {} chunks", fileName, segments.size());
 
-        // 4. Embed all chunks
-        List<Embedding> embeddings = embeddingModel.embedAll(segments).content();
-
-        // 5. Store in Pinecone — tag each chunk with docId metadata for later deletion
+        // 3. Send chunks to Pinecone (Pinecone embeds server-side via integrated embedding)
         String docId = "doc-" + UUID.randomUUID();
-        for (int i = 0; i < segments.size(); i++) {
-            TextSegment segment = segments.get(i);
-            segment.metadata().put("docId", docId);
-            segment.metadata().put("fileName", fileName);
-            embeddingStore.add(embeddings.get(i), segment);
-        }
+        List<PineconeClient.Record> records = segments.stream()
+                .map(seg -> PineconeClient.Record.builder()
+                        .id(docId + "-" + segments.indexOf(seg))
+                        .text(seg.text())
+                        .metadata(Map.of("docId", docId, "fileName", fileName))
+                        .build())
+                .toList();
+        pineconeClient.upsert(records);
 
-        // 6. Save metadata to MySQL
+        // 4. Save metadata to MySQL
         DocumentInfo docInfo = new DocumentInfo();
         docInfo.setFileName(fileName);
         docInfo.setFileSize((long) fileBytes.length);
@@ -66,20 +59,15 @@ public class KnowledgeService {
         docInfo.setChunkCount(segments.size());
         DocumentInfo saved = docRepo.save(docInfo);
 
-        log.info("Document '{}' ingested: {} chunks embedded and stored in Pinecone", fileName, segments.size());
+        log.info("Document '{}' ingested: {} chunks → Pinecone (server-side embedding)", fileName, segments.size());
         return saved;
     }
 
-    public List<TextSegment> search(String query) {
-        Embedding queryEmbedding = embeddingModel.embed(query).content();
-        EmbeddingSearchResult<TextSegment> result = embeddingStore.search(
-                EmbeddingSearchRequest.builder()
-                        .queryEmbedding(queryEmbedding)
-                        .maxResults(MAX_SEARCH_RESULTS)
-                        .build()
-        );
-        return result.matches().stream()
-                .map(match -> match.embedded())
+    public List<String> search(String query) {
+        List<PineconeClient.Hit> hits = pineconeClient.search(query, MAX_SEARCH_RESULTS);
+        return hits.stream()
+                .map(PineconeClient.Hit::getText)
+                .filter(t -> t != null)
                 .toList();
     }
 
@@ -90,17 +78,12 @@ public class KnowledgeService {
     public void deleteDocument(Long id) {
         DocumentInfo docInfo = docRepo.findById(id)
                 .orElseThrow(() -> new RuntimeException("Document not found: " + id));
-
-        // Delete vectors from Pinecone by metadata filter
-        // Note: Pinecone free tier may not support metadata filtering on delete;
-        // we log and proceed with MySQL deletion
-        log.info("Deleting document '{}' — vectors will be garbage-collected or expire", docInfo.getFileName());
-
+        log.info("Deleting document '{}' — vectors managed by Pinecone", docInfo.getFileName());
         docRepo.deleteById(id);
     }
 
     public String buildRagPrompt(String query) {
-        List<TextSegment> results = search(query);
+        List<String> results = search(query);
         if (results.isEmpty()) {
             return query;
         }
@@ -109,7 +92,7 @@ public class KnowledgeService {
         context.append("以下是相关的知识库内容，请基于这些内容回答问题：\n\n");
         for (int i = 0; i < results.size(); i++) {
             context.append("【参考资料 ").append(i + 1).append("】\n");
-            context.append(results.get(i).text()).append("\n\n");
+            context.append(results.get(i)).append("\n\n");
         }
         context.append("用户问题：").append(query);
         context.append("\n\n请基于以上参考资料回答问题。如果参考资料中没有相关信息，请如实告知。");

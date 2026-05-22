@@ -46,11 +46,7 @@ public class KnowledgeController {
 
     @PostMapping("/search")
     public ApiResponse<List<String>> search(@RequestParam String query, @RequestParam(defaultValue = "5") int topK) {
-        var results = knowledgeService.search(query);
-        List<String> texts = results.stream()
-                .limit(topK)
-                .map(dev.langchain4j.data.segment.TextSegment::text)
-                .toList();
-        return ApiResponse.success(texts);
+        List<String> results = knowledgeService.search(query);
+        return ApiResponse.success(results.stream().limit(topK).toList());
     }
 }
