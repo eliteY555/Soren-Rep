@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -31,13 +30,16 @@ public class ChatService {
     private final ChatSessionRepository sessionRepo;
     private final ConfigService configService;
     private final ModelFactory modelFactory;
+    private final KnowledgeService knowledgeService;
 
     public ChatService(ChatSessionRepository sessionRepo,
                        ConfigService configService,
-                       ModelFactory modelFactory) {
+                       ModelFactory modelFactory,
+                       KnowledgeService knowledgeService) {
         this.sessionRepo = sessionRepo;
         this.configService = configService;
         this.modelFactory = modelFactory;
+        this.knowledgeService = knowledgeService;
     }
 
     /**
@@ -57,7 +59,13 @@ public class ChatService {
 
             String decryptedApiKey = configService.decryptApiKey(provider.getApiKey());
 
-            // Save user message
+            // Build prompt — augment with RAG context if RAG mode
+            String promptContent = request.getContent();
+            if (request.getMode() == ChatMode.RAG) {
+                promptContent = knowledgeService.buildRagPrompt(request.getContent());
+            }
+
+            // Save user message (original content, not the augmented prompt)
             saveMessage(session, "USER", request.getContent(),
                     provider.getName(), request.getMode().name());
 
@@ -69,7 +77,7 @@ public class ChatService {
             String sessionId = session.getId();
             String providerName = provider.getName();
 
-            model.generate(request.getContent(), new StreamingResponseHandler<AiMessage>() {
+            model.generate(promptContent, new StreamingResponseHandler<AiMessage>() {
                 @Override
                 public void onNext(String token) {
                     fullResponse.append(token);

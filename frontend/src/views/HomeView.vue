@@ -2,13 +2,27 @@
   <div class="home">
     <!-- Sidebar -->
     <aside class="sidebar">
+      <div class="sidebar-tabs">
+        <el-button
+          :type="sidebarTab === 'chat' ? 'primary' : ''"
+          size="small"
+          @click="sidebarTab = 'chat'"
+        >对话</el-button>
+        <el-button
+          :type="sidebarTab === 'knowledge' ? 'primary' : ''"
+          size="small"
+          @click="sidebarTab = 'knowledge'"
+        >知识库</el-button>
+      </div>
       <SessionList
+        v-if="sidebarTab === 'chat'"
         :sessions="chatStore.sessions"
         :currentId="chatStore.currentSessionId"
         @newSession="chatStore.createNewSession()"
         @switch="chatStore.switchSession($event)"
         @delete="chatStore.deleteCurrentSession($event)"
       />
+      <KnowledgePanel v-if="sidebarTab === 'knowledge'" />
     </aside>
 
     <!-- Main area -->
@@ -83,12 +97,14 @@ import VoiceButton from '../components/VoiceButton.vue'
 import SessionList from '../components/SessionList.vue'
 import ProviderSelector from '../components/ProviderSelector.vue'
 import ModeSwitch from '../components/ModeSwitch.vue'
+import KnowledgePanel from '../components/KnowledgePanel.vue'
 
 const chatStore = useChatStore()
 const configStore = useConfigStore()
 const speech = useSpeech()
 
 const textInput = ref('')
+const sidebarTab = ref('chat')
 
 onMounted(async () => {
   await configStore.loadProviders()
@@ -118,6 +134,7 @@ function sendTranscript() {
 <style scoped>
 .home { display: flex; height: 100vh; }
 .sidebar { width: 260px; border-right: 1px solid #e4e7ed; background: #fafafa; overflow-y: auto; }
+.sidebar-tabs { display: flex; gap: 8px; padding: 12px 12px 0 12px; }
 .main { flex: 1; display: flex; flex-direction: column; }
 .topbar {
   display: flex; align-items: center; gap: 12px;

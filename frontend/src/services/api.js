@@ -82,3 +82,27 @@ export function deleteProvider(id) {
 export function activateProvider(id) {
   return http.put(`/config/providers/${id}/activate`).then(r => r.data.data)
 }
+
+// --- Knowledge Base API ---
+
+export function uploadDocument(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return http.post('/knowledge/documents', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }).then(r => r.data.data)
+}
+
+export function listDocuments() {
+  return http.get('/knowledge/documents').then(r => r.data.data)
+}
+
+export function deleteDocument(id) {
+  return http.delete(`/knowledge/documents/${id}`).then(r => r.data)
+}
+
+export function searchKnowledge(query, topK = 5) {
+  return http.post('/knowledge/search', null, {
+    params: { query, topK }
+  }).then(r => r.data.data)
+}
