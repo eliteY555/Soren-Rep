@@ -1,0 +1,17 @@
+# Maven
+backend/target/
+backend/*/target/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Java
+*.class
+*.jar
+*.war
