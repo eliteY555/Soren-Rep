@@ -1,5 +1,6 @@
 package com.voiceassistant.common.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -10,5 +11,6 @@ public class ProviderConfigDto {
     private String baseUrl;
     private String modelName;
     private Boolean active;
-    // apiKey 只写不入——查询时不返回
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private String apiKey;         // 只写不入——查询时不返回
 }
