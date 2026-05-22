@@ -13,6 +13,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
   data:
     mongodb:
       uri: mongodb://localhost:27017/voice_assistant
@@ -30,9 +33,9 @@ pinecone:
 initial-provider:
   name: DeepSeek V4 Pro
   provider: deepseek
-  base-url: ${INITIAL_PROVIDER_BASE_URL:https://api.deepseek.com/v1}
+  base-url:
   model-name: deepseek-v4-pro
-  api-key: ${INITIAL_PROVIDER_API_KEY:}
+  api-key: ${DEEPSEEK_KEY}
 
 logging:
   level:
