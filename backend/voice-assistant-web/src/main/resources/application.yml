@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: voice-assistant
+  datasource:
+    url: jdbc:mysql://localhost:3306/voice_assistant?useUnicode=true&characterEncoding=utf-8&createDatabaseIfNotExist=true
+    username: root
+    password: ${MYSQL_PASSWORD:root}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/voice_assistant
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+
+logging:
+  level:
+    com.voiceassistant: DEBUG
+    dev.langchain4j: DEBUG
