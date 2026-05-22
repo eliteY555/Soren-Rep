@@ -41,11 +41,18 @@ export const useConfigStore = defineStore('config', () => {
 
   function setChatMode(mode) {
     chatMode.value = mode
+    sessionStorage.setItem('ai-chat-mode', mode)
+  }
+
+  // Restore mode from sessionStorage (for popup window sync)
+  function restoreMode() {
+    const saved = sessionStorage.getItem('ai-chat-mode')
+    if (saved === 'RAG' || saved === 'DIRECT') chatMode.value = saved
   }
 
   return {
     providers, activeProviderId, activeProviderName, chatMode,
     loadProviders, addProvider, updateProvider,
-    deleteProvider, activateProvider, setChatMode
+    deleteProvider, activateProvider, setChatMode, restoreMode
   }
 })

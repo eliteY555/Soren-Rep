@@ -110,16 +110,13 @@ export const useChatStore = defineStore('chat', () => {
       { sessionId: currentSessionId.value, content, mode, providerId },
       {
         onToken(token) {
+          // Accumulate silently — only reveal on done to avoid half-rendered markdown
           streamingContent.value += token
-          const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
-          messages.value = arr
         },
         onDone() {
           const arr = [...messages.value]
-          const item = { ...arr[aiIndex] }
-          delete item.streaming
-          arr[aiIndex] = item
+          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
+          delete arr[aiIndex].streaming
           messages.value = arr
           isStreaming.value = false
           streamingContent.value = ''
@@ -129,7 +126,8 @@ export const useChatStore = defineStore('chat', () => {
         onError(err) {
           console.error('Stream error:', err)
           const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message, streaming: undefined }
+          arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message }
+          delete arr[aiIndex].streaming
           messages.value = arr
           isStreaming.value = false
         }

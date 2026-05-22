@@ -4,12 +4,19 @@
     <header class="mini-bar">
       <span class="mini-bar-brand">◈ AI 助手</span>
       <span v-if="configStore.activeProviderName" class="mini-bar-chip">{{ configStore.activeProviderName }}</span>
-      <span v-if="configStore.chatMode === 'RAG'" class="mini-bar-chip mode">知识库</span>
+      <button
+        class="mini-mode-btn"
+        :class="{ active: configStore.chatMode === 'RAG' }"
+        @click="toggleMode"
+        title="切换知识库增强模式"
+      >
+        {{ configStore.chatMode === 'RAG' ? '知识库' : '直接' }}
+      </button>
       <button class="mini-back-btn" @click="goBack" title="返回主窗口">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M15 3h6v6"/><path d="M10 14L21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
         </svg>
-        <span>返回主窗口</span>
+        <span>返回</span>
       </button>
     </header>
 
@@ -21,7 +28,10 @@
       </div>
       <div class="mini-messages" v-else>
         <div v-for="(msg, idx) in chatStore.messages" :key="idx" class="mini-msg">
-          <div :class="['mini-bubble', msg.role === 'USER' ? 'user' : 'ai']" v-html="renderContent(msg.content, msg.streaming)" />
+          <div v-if="msg.streaming && !msg.content" class="mini-loading">
+            <span class="lds-dot" /><span class="lds-dot" /><span class="lds-dot" />
+          </div>
+          <div v-else :class="['mini-bubble', msg.role === 'USER' ? 'user' : 'ai']" v-html="renderContent(msg.content)" />
         </div>
         <div ref="bottomRef" />
       </div>
@@ -63,7 +73,7 @@ import { ref, onMounted, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
 import { useSpeech } from '../composables/useSpeech'
-import { safeMarkdown, safeStreamingMarkdown } from '../marked-setup'
+import { safeMarkdown } from '../marked-setup'
 import VoiceButton from '../components/VoiceButton.vue'
 
 const chatStore = useChatStore()
@@ -75,9 +85,9 @@ const bottomRef = ref(null)
 
 onMounted(async () => {
   await configStore.loadProviders()
+  configStore.restoreMode()
   await chatStore.loadSessions()
 
-  // 优先从 sessionStorage 同步当前会话（可靠，无竞态）
   const savedId = sessionStorage.getItem('ai-active-session')
   if (savedId) {
     await chatStore.switchSession(savedId)
@@ -99,9 +109,14 @@ watch(() => speech.transcript.value, (val) => {
   if (val) textInput.value = val
 })
 
-function renderContent(content, isStreaming) {
-  if (!content) return '<span style="color: var(--text-muted); font-style: italic;">思考中…</span>'
-  return isStreaming ? safeStreamingMarkdown(content) : safeMarkdown(content)
+function renderContent(content) {
+  if (!content) return ''
+  return safeMarkdown(content)
+}
+
+function toggleMode() {
+  const next = configStore.chatMode === 'RAG' ? 'DIRECT' : 'RAG'
+  configStore.setChatMode(next)
 }
 
 function sendText() {
@@ -175,7 +190,17 @@ body {
   font-size: 10px; padding: 1px 6px; border-radius: 8px;
   background: var(--bg-hover); color: var(--text-muted);
 }
-.mini-bar-chip.mode { background: rgba(34,197,94,0.15); color: var(--accent); }
+.mini-mode-btn {
+  font-size: 10px; padding: 2px 8px; border-radius: 8px;
+  background: var(--bg-hover); border: 1px solid transparent;
+  color: var(--text-muted); cursor: pointer; font-family: inherit;
+  transition: all 0.15s ease;
+}
+.mini-mode-btn:hover { color: var(--text-primary); }
+.mini-mode-btn.active {
+  background: rgba(34,197,94,0.15); color: var(--accent);
+  border-color: rgba(34,197,94,0.3);
+}
 .mini-back-btn {
   display: flex; align-items: center; gap: 4px; margin-left: auto;
   padding: 3px 8px; background: transparent; border: 1px solid var(--border);
@@ -189,6 +214,23 @@ body {
 .mini-empty { text-align: center; padding-top: 35%; opacity: 0.5; }
 .mini-empty-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
 .mini-empty-desc { font-size: 12px; color: var(--text-muted); }
+
+/* Loading dots */
+.mini-loading {
+  display: flex; align-items: center; gap: 4px;
+  padding: 10px 14px; margin-right: auto;
+}
+.lds-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent); opacity: 0.4;
+  animation: dotPulseMini 1.4s ease-in-out infinite;
+}
+.lds-dot:nth-child(2) { animation-delay: 0.2s; }
+.lds-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulseMini {
+  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+  40% { opacity: 1; transform: scale(1.2); }
+}
 .mini-msg { margin-bottom: 12px; }
 .mini-bubble {
   max-width: 94%; padding: 8px 12px; border-radius: 10px;
