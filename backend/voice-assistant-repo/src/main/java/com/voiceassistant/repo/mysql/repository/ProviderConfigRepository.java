@@ -9,7 +9,7 @@ import java.util.Optional;
 @Repository
 public interface ProviderConfigRepository extends JpaRepository<ProviderConfig, Long> {
 
-    Optional<ProviderConfig> findByActiveTrue();
+    Optional<ProviderConfig> findFirstByActiveTrue();
 
     boolean existsByName(String name);
 }
