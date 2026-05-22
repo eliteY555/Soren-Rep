@@ -26,13 +26,21 @@ pinecone:
   api-key: ${PINECONE_API_KEY:your-pinecone-api-key}
   environment: ${PINECONE_ENV:gcp-starter}
   project-id: ${PINECONE_PROJECT_ID:your-pinecone-project-id}
-  index: ${PINECONE_INDEX:voice-assistant}
+  index: ${PINECONE_INDEX:job-assistant}
 
 # --- Embedding Model (OpenAI, separate from chat LLM) ---
 embedding:
   openai:
     api-key: ${OPENAI_API_KEY:your-openai-api-key}
     model-name: text-embedding-3-small
+
+# --- Initial LLM Provider (seeded on first startup) ---
+initial-provider:
+  name: DeepSeek V4 Pro
+  provider: deepseek
+  base-url: ${INITIAL_PROVIDER_BASE_URL:https://api.deepseek.com/v1}
+  model-name: ${INITIAL_PROVIDER_MODEL:deepseek-chat}
+  api-key: ${INITIAL_PROVIDER_API_KEY:}
 
 logging:
   level:
