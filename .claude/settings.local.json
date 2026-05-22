@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(hg status *)",
+      "Bash(git -C \"D:/y-space/PROJECT/Job-Assistant\" status --short)",
+      "Bash(mvn compile *)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(git -C D:/y-space/PROJECT/Job-Assistant log --oneline 9860ff4..51738b8)",
+      "Bash(git commit *)",
+      "Bash(mvn install *)",
+      "Bash(mvn clean *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git reset *)",
+      "Bash(mysqladmin ping *)",
+      "Bash(mongosh --eval \"db.runCommand\\({ping:1}\\)\" --quiet)",
+      "Bash(command -v mongod)",
+      "Bash(mongod --version)",
+      "Bash(cat)",
+      "Bash(curl -s -X POST http://localhost:8080/api/knowledge/documents -F file=@/tmp/test_knowledge.txt)",
+      "Bash(netstat -ano)",
+      "Bash(sc query *)",
+      "Bash(mongosh --eval \"db.version\\(\\)\" --quiet)",
+      "Bash(mongo --eval \"db.version\\(\\)\" --quiet)",
+      "Bash(python3 *)",
+      "Bash(python *)",
+      "Bash(node -c electron/main.js)",
+      "Bash(node -c electron/preload.js)",
+      "Bash(curl -s http://localhost:8080/api/knowledge/documents)",
+      "Bash(curl *)",
+      "Bash(java -jar backend/voice-assistant-web/target/voice-assistant-web-1.0.0-SNAPSHOT.jar)",
+      "Bash(echo \"Backend PID: $!\")",
+      "Bash(node -c electron/main.cjs)",
+      "Bash(node -c electron/preload.cjs)"
+    ]
+  }
+}

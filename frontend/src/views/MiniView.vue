@@ -46,7 +46,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
 import { useSpeech } from '../composables/useSpeech'
@@ -60,36 +60,12 @@ const speech = useSpeech()
 const textInput = ref('')
 const bottomRef = ref(null)
 
-// BroadcastChannel — sync with main window
-const channel = new BroadcastChannel('ai-assistant-sync')
-
 onMounted(async () => {
   await configStore.loadProviders()
   await chatStore.loadSessions()
 
-  // Listen for sync from main window
-  channel.onmessage = async (event) => {
-    const { type, sessionId } = event.data
-    if (type === 'message-sent' || type === 'session-switched') {
-      if (sessionId && chatStore.currentSessionId !== sessionId) {
-        await chatStore.switchSession(sessionId)
-      } else if (sessionId === chatStore.currentSessionId || type === 'message-sent') {
-        // Reload current session messages
-        const api = await import('../services/api')
-        const msgs = await api.getSessionMessages(chatStore.currentSessionId)
-        if (msgs?.length) chatStore.messages = msgs
-      }
-    } else if (type === 'session-deleted') {
-      await chatStore.loadSessions()
-    }
-  }
-
-  // Notify main window that mini is ready
-  channel.postMessage({ type: 'mini-ready', sessionId: chatStore.currentSessionId })
-})
-
-onUnmounted(() => {
-  channel.close()
+  // Request sync from main window — chatStore's BroadcastChannel handles the rest
+  chatStore.broadcast('mini-ready')
 })
 
 // Scroll to bottom

@@ -30,6 +30,12 @@ export const useChatStore = defineStore('chat', () => {
     const { type, sessionId } = event.data
     try {
       switch (type) {
+        case 'mini-ready':
+          // Popup just loaded — reply with our current session so it can sync
+          if (currentSessionId.value) {
+            broadcast('session-switched')
+          }
+          break
         case 'message-sent':
         case 'force-refresh':
           if (currentSessionId.value) {
