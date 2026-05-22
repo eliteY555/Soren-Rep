@@ -2,6 +2,7 @@ package com.voiceassistant.llm.config;
 
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -27,6 +28,20 @@ public class PineconeConfiguration {
 
     @Value("${embedding.model-name:text-embedding-v3}")
     private String embeddingModelName;
+
+    @PostConstruct
+    void validate() {
+        if (pineconeApiKey.isBlank() || pineconeApiKey.contains("your-pinecone")) {
+            log.error("PINECONE_API_KEY is not set! Set the environment variable or edit application.yml");
+        } else {
+            log.info("Pinecone API key configured (prefix: {})", pineconeApiKey.substring(0, Math.min(8, pineconeApiKey.length())) + "...");
+        }
+        if (embeddingApiKey.isBlank() || embeddingApiKey.contains("your-")) {
+            log.error("QWEN_KEY (embedding.api-key) is not set! Set the environment variable or edit application.yml");
+        } else {
+            log.info("Embedding API key configured (prefix: {})", embeddingApiKey.substring(0, Math.min(8, embeddingApiKey.length())) + "...");
+        }
+    }
 
     @Bean
     public EmbeddingModel embeddingModel() {
