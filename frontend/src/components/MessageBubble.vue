@@ -1,12 +1,12 @@
 <template>
-  <div :class="['msg-row', role === 'USER' ? 'user' : 'ai']">
-    <div class="msg-avatar" v-if="role !== 'USER'">
+  <div :class="['msg-row', role === 'USER' ? 'user' : 'ai', { compact: compact }]">
+    <div class="msg-avatar" v-if="role !== 'USER' && !compact">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
       </svg>
     </div>
     <div :class="['msg-body', role === 'USER' ? 'user-body' : 'ai-body']">
-      <div class="msg-meta">
+      <div class="msg-meta" v-if="!compact">
         <span class="msg-role">{{ role === 'USER' ? '你' : 'AI 助手' }}</span>
         <span v-if="mode === 'RAG'" class="msg-mode">知识库增强</span>
         <span class="msg-time">{{ formatTime(timestamp) }}</span>
@@ -28,7 +28,8 @@ import { safeMarkdown } from '../marked-setup.js'
 
 const props = defineProps({
   role: String, content: String, providerName: String,
-  mode: String, streaming: Boolean, timestamp: String
+  mode: String, streaming: Boolean, timestamp: String,
+  compact: Boolean
 })
 
 const contentRef = ref(null)
@@ -210,4 +211,21 @@ function formatTime(ts) {
   animation: blink 0.8s step-end infinite; border-radius: 1px;
 }
 @keyframes blink { 50% { opacity: 0; } }
+
+/* --- Compact mode (mini window) --- */
+.msg-row.compact { gap: 0; margin-bottom: 12px; }
+.msg-row.compact .msg-body { max-width: 95%; }
+.msg-row.compact .msg-content {
+  padding: 8px 12px; font-size: 13px; line-height: 1.6;
+  border-radius: 10px;
+}
+.compact .user-body .msg-content { border-bottom-right-radius: 3px; }
+.compact .ai-body .msg-content { border-bottom-left-radius: 3px; }
+.compact .msg-content :deep(h1) { font-size: 1.15em; margin: 10px 0 6px; border-bottom: none; }
+.compact .msg-content :deep(h2) { font-size: 1.08em; margin: 8px 0 4px; border-bottom: none; }
+.compact .msg-content :deep(h3) { font-size: 1.02em; margin: 6px 0 3px; }
+.compact .msg-content :deep(p) { margin: 0 0 6px 0; }
+.compact .msg-content :deep(pre) { font-size: 12px; }
+.compact .msg-content :deep(blockquote) { font-size: 12px; }
+.compact .streaming-loader { padding: 2px 0; }
 </style>

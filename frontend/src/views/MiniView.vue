@@ -27,14 +27,19 @@
         <p class="mini-empty-desc">输入问题开始对话</p>
       </div>
       <div class="mini-messages" v-else>
-        <div v-for="(msg, idx) in chatStore.messages" :key="idx" class="mini-msg">
-          <div v-if="msg.streaming && !msg.content" class="mini-loading">
-            <span class="lds-dot" /><span class="lds-dot" /><span class="lds-dot" />
-          </div>
-          <div v-else :class="['mini-bubble', msg.role === 'USER' ? 'user' : 'ai']" v-html="renderContent(msg.content)" />
-        </div>
-        <div ref="bottomRef" />
+        <MessageBubble
+          v-for="(msg, idx) in chatStore.messages"
+          :key="idx"
+          :role="msg.role"
+          :content="msg.content"
+          :mode="msg.mode"
+          :streaming="msg.streaming"
+          :timestamp="msg.timestamp"
+          :provider-name="msg.providerName"
+          compact
+        />
       </div>
+      <div ref="bottomRef" />
     </div>
 
     <!-- 输入区域 -->
@@ -73,7 +78,7 @@ import { ref, onMounted, watch, nextTick } from 'vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
 import { useSpeech } from '../composables/useSpeech'
-import { safeMarkdown } from '../marked-setup'
+import MessageBubble from '../components/MessageBubble.vue'
 import VoiceButton from '../components/VoiceButton.vue'
 
 const chatStore = useChatStore()
@@ -94,7 +99,7 @@ onMounted(async () => {
   }
 })
 
-// Scroll to bottom
+// Scroll to bottom on new messages
 watch(() => chatStore.messages.length, () => {
   nextTick(() => bottomRef.value?.scrollIntoView({ behavior: 'smooth' }))
 })
@@ -109,16 +114,6 @@ watch(() => speech.transcript.value, (val) => {
   if (val) textInput.value = val
 })
 
-function renderContent(content) {
-  if (!content) return ''
-  return safeMarkdown(content)
-}
-
-function toggleMode() {
-  const next = configStore.chatMode === 'RAG' ? 'DIRECT' : 'RAG'
-  configStore.setChatMode(next)
-}
-
 function sendText() {
   const content = textInput.value.trim()
   if (!content) return
@@ -126,8 +121,12 @@ function sendText() {
   chatStore.sendMessage(content, configStore.chatMode, configStore.activeProviderId)
 }
 
+function toggleMode() {
+  const next = configStore.chatMode === 'RAG' ? 'DIRECT' : 'RAG'
+  configStore.setChatMode(next)
+}
+
 function goBack() {
-  // 关闭弹窗，聚焦主窗口
   if (window.opener) {
     window.opener.focus()
   }
@@ -136,7 +135,6 @@ function goBack() {
 </script>
 
 <style>
-/* Mini window — standalone page, no scoped */
 html, body, #app { margin: 0; padding: 0; height: 100%; overflow: hidden; }
 
 :root {
@@ -210,66 +208,13 @@ body {
 .mini-back-btn:hover { background: var(--bg-hover); color: var(--accent); border-color: var(--accent); }
 
 /* Chat */
-.mini-chat { flex: 1; overflow-y: auto; padding: 10px 12px; }
+.mini-chat {
+  flex: 1; overflow-y: auto;
+  padding: 8px 10px;
+}
 .mini-empty { text-align: center; padding-top: 35%; opacity: 0.5; }
 .mini-empty-title { font-size: 14px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px; }
 .mini-empty-desc { font-size: 12px; color: var(--text-muted); }
-
-/* Loading dots */
-.mini-loading {
-  display: flex; align-items: center; gap: 4px;
-  padding: 10px 14px; margin-right: auto;
-}
-.lds-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent); opacity: 0.4;
-  animation: dotPulseMini 1.4s ease-in-out infinite;
-}
-.lds-dot:nth-child(2) { animation-delay: 0.2s; }
-.lds-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotPulseMini {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1.2); }
-}
-.mini-msg { margin-bottom: 12px; }
-.mini-bubble {
-  max-width: 94%; padding: 8px 12px; border-radius: 10px;
-  font-size: 13px; line-height: 1.6; word-break: break-word;
-}
-.mini-bubble.user {
-  background: var(--user-bubble); color: var(--user-bubble-text);
-  margin-left: auto; border-bottom-right-radius: 3px;
-}
-.mini-bubble.ai {
-  background: var(--ai-bubble); color: var(--ai-bubble-text);
-  margin-right: auto; border-bottom-left-radius: 3px;
-  border: 1px solid var(--border);
-}
-
-/* Markdown */
-.mini-bubble :deep(h1) { font-size: 1.15em; margin: 10px 0 6px; }
-.mini-bubble :deep(h2) { font-size: 1.08em; margin: 8px 0 4px; }
-.mini-bubble :deep(h3) { font-size: 1.02em; margin: 6px 0 3px; }
-.mini-bubble :deep(p) { margin: 0 0 6px 0; }
-.mini-bubble :deep(p:last-child) { margin-bottom: 0; }
-.mini-bubble :deep(ul), .mini-bubble :deep(ol) { padding-left: 16px; margin: 4px 0; }
-.mini-bubble :deep(li) { margin-bottom: 2px; }
-.mini-bubble :deep(code) {
-  font-size: 0.85em; background: rgba(255,255,255,0.08); color: #e879f9;
-  padding: 1px 4px; border-radius: 3px;
-}
-.mini-bubble :deep(pre) {
-  margin: 6px 0; padding: 8px 10px; border-radius: 6px;
-  background: #0D1520; border: 1px solid var(--border);
-  font-size: 11.5px; overflow-x: auto;
-}
-.mini-bubble :deep(pre code) { background: transparent; padding: 0; }
-.mini-bubble :deep(blockquote) {
-  border-left: 2px solid var(--accent); margin: 6px 0; padding: 4px 8px;
-  background: rgba(34,197,94,0.05); border-radius: 0 6px 6px 0;
-  color: var(--text-secondary); font-size: 12px;
-}
-.mini-bubble :deep(a) { color: var(--accent); }
 
 /* Input */
 .mini-input { padding: 8px 10px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--bg-secondary); }
