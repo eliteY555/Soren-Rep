@@ -146,11 +146,11 @@ async function handleActivate(id) {
 .provider-list { max-height: 200px; overflow-y: auto; }
 .provider-card {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 0; border-bottom: 1px solid #f0f0f0;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
 }
 .provider-info { display: flex; align-items: center; gap: 10px; }
-.provider-name { font-weight: 500; font-size: 14px; }
-.provider-model { color: #909399; font-size: 13px; }
+.provider-name { font-weight: 500; font-size: 14px; color: var(--text-primary); }
+.provider-model { color: var(--text-muted); font-size: 13px; }
 .provider-actions { display: flex; gap: 4px; }
-.form-title { font-weight: 600; margin-bottom: 12px; font-size: 14px; }
+.form-title { font-weight: 600; margin-bottom: 12px; font-size: 14px; color: var(--text-primary); }
 </style>

@@ -2,51 +2,52 @@
   <div class="home">
     <!-- Sidebar -->
     <aside class="sidebar">
-      <div class="sidebar-tabs">
-        <el-button :type="sidebarTab === 'chat' ? 'primary' : ''" size="small" @click="sidebarTab = 'chat'">
-          对话
-        </el-button>
-        <el-button :type="sidebarTab === 'knowledge' ? 'primary' : ''" size="small" @click="sidebarTab = 'knowledge'">
-          知识库
-        </el-button>
+      <div class="sidebar-brand">
+        <span class="brand-icon">◈</span>
+        <span class="brand-text">AI 助手</span>
       </div>
-      <SessionList
-        v-if="sidebarTab === 'chat'"
-        :sessions="chatStore.sessions"
-        :currentId="chatStore.currentSessionId"
-        @newSession="chatStore.createNewSession()"
-        @switch="chatStore.switchSession($event)"
-        @delete="chatStore.deleteCurrentSession($event)"
-      />
-      <KnowledgePanel v-if="sidebarTab === 'knowledge'" />
+      <div class="sidebar-tabs">
+        <button :class="['tab-btn', sidebarTab === 'chat' && 'active']" @click="sidebarTab = 'chat'">
+          对话
+        </button>
+        <button :class="['tab-btn', sidebarTab === 'knowledge' && 'active']" @click="sidebarTab = 'knowledge'">
+          知识库
+        </button>
+      </div>
+      <div class="sidebar-content">
+        <SessionList
+          v-if="sidebarTab === 'chat'"
+          :sessions="chatStore.sessions"
+          :currentId="chatStore.currentSessionId"
+          @newSession="chatStore.createNewSession()"
+          @switch="chatStore.switchSession($event)"
+          @delete="chatStore.deleteCurrentSession($event)"
+        />
+        <KnowledgePanel v-if="sidebarTab === 'knowledge'" />
+      </div>
     </aside>
 
     <!-- Main area -->
     <main class="main">
-      <!-- Top bar -->
       <header class="topbar">
-        <ProviderSelector
-          :providers="configStore.providers"
-          :activeId="configStore.activeProviderId"
-          @change="configStore.activateProvider($event)"
-        />
-        <ModeSwitch :mode="configStore.chatMode" @change="configStore.setChatMode($event)" />
-        <el-button size="small" @click="showProviderDialog = true" :icon="Setting">
-          设置
-        </el-button>
-        <el-button
-          :type="speech.mode.value === 'streaming' ? 'warning' : ''"
-          size="small"
-          @click="toggleSpeechMode"
-        >
-          {{ speech.mode.value === 'ptt' ? '实时模式' : '按键模式' }}
-        </el-button>
+        <div class="topbar-left">
+          <ProviderSelector
+            :providers="configStore.providers"
+            :activeId="configStore.activeProviderId"
+            @change="configStore.activateProvider($event)"
+          />
+          <ModeSwitch :mode="configStore.chatMode" @change="configStore.setChatMode($event)" />
+        </div>
+        <div class="topbar-right">
+          <el-button size="small" text @click="toggleSpeechMode" class="mode-toggle">
+            {{ speech.mode.value === 'ptt' ? '🎤 实时模式' : '🎤 按键模式' }}
+          </el-button>
+          <el-button size="small" text :icon="Setting" @click="showProviderDialog = true" class="settings-btn" />
+        </div>
       </header>
 
-      <!-- Chat panel -->
       <ChatPanel :messages="chatStore.messages" />
 
-      <!-- Input area -->
       <footer class="input-area">
         <div class="input-row">
           <VoiceButton
@@ -57,40 +58,45 @@
             @stop="speech.stopListening()"
           />
 
-          <el-input
-            v-model="textInput"
-            placeholder="输入问题，或按住麦克风按钮语音输入..."
-            @keyup.enter="sendText"
-            :disabled="chatStore.isStreaming"
-            clearable
-          />
+          <div class="text-input-wrap">
+            <input
+              v-model="textInput"
+              class="text-input"
+              placeholder="输入问题，或使用麦克风语音输入…"
+              @keydown.enter="sendText"
+              :disabled="chatStore.isStreaming"
+              ref="inputRef"
+            />
+          </div>
 
-          <el-button type="primary" :icon="Promotion"
+          <button
+            class="send-btn"
             @click="sendText"
             :disabled="!textInput.trim() || chatStore.isStreaming"
+            :class="{ active: textInput.trim() && !chatStore.isStreaming }"
           >
-            发送
-          </el-button>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
         </div>
 
-        <!-- Voice transcript preview -->
         <div v-if="speech.transcript.value || speech.interimTranscript.value" class="transcript-preview">
           <span class="final-text">{{ speech.transcript.value }}</span>
           <span class="interim-text">{{ speech.interimTranscript.value }}</span>
-          <el-button size="small" text type="primary" @click="sendTranscript">发送</el-button>
-          <el-button size="small" text @click="speech.clearTranscript()">清除</el-button>
+          <button class="transcript-action" @click="sendTranscript">发送</button>
+          <button class="transcript-action muted" @click="speech.clearTranscript()">清除</button>
         </div>
       </footer>
     </main>
 
-    <!-- Provider settings dialog -->
     <ProviderDialog v-if="showProviderDialog" @close="showProviderDialog = false" />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
-import { Promotion, Setting } from '@element-plus/icons-vue'
+import { Setting } from '@element-plus/icons-vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
 import { useSpeech } from '../composables/useSpeech'
@@ -109,6 +115,7 @@ const speech = useSpeech()
 const textInput = ref('')
 const sidebarTab = ref('chat')
 const showProviderDialog = ref(false)
+const inputRef = ref(null)
 
 onMounted(async () => {
   await configStore.loadProviders()
@@ -139,21 +146,90 @@ function sendTranscript() {
 </script>
 
 <style scoped>
-.home { display: flex; height: 100vh; }
-.sidebar { width: 260px; border-right: 1px solid #e4e7ed; background: #fafafa; overflow-y: auto; }
-.sidebar-tabs { display: flex; gap: 8px; padding: 12px 12px 0 12px; }
-.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.topbar {
+.home { display: flex; height: 100vh; background: var(--bg-primary); }
+
+/* Sidebar */
+.sidebar {
+  width: 280px; flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+.sidebar-brand {
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 20px; border-bottom: 1px solid #e4e7ed; flex-shrink: 0;
+  padding: 20px 20px 16px; user-select: none;
 }
-.input-area { border-top: 1px solid #e4e7ed; padding: 16px 20px; flex-shrink: 0; }
+.brand-icon { font-size: 20px; color: var(--accent); }
+.brand-text { font-size: 16px; font-weight: 700; color: var(--text-primary); letter-spacing: -0.3px; }
+.sidebar-tabs {
+  display: flex; gap: 4px; padding: 0 16px 12px;
+}
+.tab-btn {
+  flex: 1; padding: 8px 0; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500; cursor: pointer;
+  background: transparent; color: var(--text-muted);
+  border: none; font-family: inherit;
+  transition: all 0.2s ease;
+}
+.tab-btn:hover { background: var(--bg-hover); color: var(--text-secondary); }
+.tab-btn.active { background: var(--accent-soft); color: var(--accent); }
+.sidebar-content { flex: 1; overflow: hidden; }
+
+/* Main */
+.main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+/* Topbar */
+.topbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 24px; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-secondary);
+}
+.topbar-left, .topbar-right { display: flex; align-items: center; gap: 10px; }
+.mode-toggle { color: var(--text-muted) !important; font-size: 13px !important; }
+.mode-toggle:hover { color: var(--text-primary) !important; }
+.settings-btn { color: var(--text-muted) !important; }
+.settings-btn:hover { color: var(--text-primary) !important; }
+
+/* Input area */
+.input-area { padding: 16px 24px 20px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--bg-secondary); }
 .input-row { display: flex; align-items: center; gap: 12px; }
-.transcript-preview {
-  margin-top: 8px; padding: 8px 12px; background: #f0f9eb;
-  border-radius: 6px; font-size: 14px;
-  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+.text-input-wrap { flex: 1; }
+.text-input {
+  width: 100%; padding: 12px 16px;
+  background: var(--bg-input); border: 1px solid var(--border);
+  border-radius: var(--radius-md); color: var(--text-primary);
+  font-size: 14px; font-family: inherit; outline: none;
+  transition: border-color 0.2s ease;
 }
-.final-text { color: #303133; }
-.interim-text { color: #909399; font-style: italic; }
+.text-input:focus { border-color: var(--accent); }
+.text-input::placeholder { color: var(--text-muted); }
+.text-input:disabled { opacity: 0.5; }
+
+.send-btn {
+  width: 44px; height: 44px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-md); border: none;
+  cursor: pointer; transition: all 0.2s ease;
+  background: var(--bg-input); color: var(--text-muted);
+}
+.send-btn.active { background: var(--accent); color: #fff; }
+.send-btn.active:hover { background: var(--accent-hover); }
+.send-btn:disabled { cursor: not-allowed; opacity: 0.4; }
+
+/* Transcript preview */
+.transcript-preview {
+  margin-top: 10px; padding: 10px 14px;
+  background: var(--accent-soft); border: 1px solid rgba(34,197,94,0.2);
+  border-radius: var(--radius-sm); font-size: 14px;
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+}
+.final-text { color: var(--text-primary); }
+.interim-text { color: var(--text-muted); font-style: italic; }
+.transcript-action {
+  background: none; border: none; color: var(--accent);
+  font-size: 13px; cursor: pointer; font-family: inherit;
+}
+.transcript-action.muted { color: var(--text-muted); }
+.transcript-action:hover { text-decoration: underline; }
 </style>
