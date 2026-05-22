@@ -2,6 +2,9 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import * as api from '../services/api'
 
+// Unique window ID — prevents reacting to own broadcasts
+const winId = Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 6)
+
 // BroadcastChannel for cross-window sync (main window ↔ popup)
 let syncChannel = null
 try {
@@ -22,19 +25,19 @@ export const useChatStore = defineStore('chat', () => {
   // --- Broadcast sync helpers ---
   function broadcast(type) {
     if (syncChannel) {
-      syncChannel.postMessage({ type, sessionId: currentSessionId.value })
+      syncChannel.postMessage({ type, sessionId: currentSessionId.value, _from: winId })
     }
   }
 
   async function handleSyncEvent(event) {
+    // Ignore own broadcasts
+    if (event.data._from === winId) return
+
     const { type, sessionId } = event.data
     try {
       switch (type) {
         case 'mini-ready':
-          // Popup just loaded — reply with our current session so it can sync
-          if (currentSessionId.value) {
-            broadcast('session-switched')
-          }
+          if (currentSessionId.value) broadcast('session-switched')
           break
         case 'message-sent':
         case 'force-refresh':
@@ -110,13 +113,17 @@ export const useChatStore = defineStore('chat', () => {
       { sessionId: currentSessionId.value, content, mode, providerId },
       {
         onToken(token) {
-          // Accumulate silently — only reveal on done to avoid half-rendered markdown
           streamingContent.value += token
+          // Progressive update — MessageBubble uses safeStreamingMarkdown during streaming
+          const arr = [...messages.value]
+          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
+          messages.value = arr
         },
         onDone() {
           const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
-          delete arr[aiIndex].streaming
+          const item = { ...arr[aiIndex], content: streamingContent.value }
+          delete item.streaming
+          arr[aiIndex] = item
           messages.value = arr
           isStreaming.value = false
           streamingContent.value = ''

@@ -12,11 +12,8 @@
         <span class="msg-time">{{ formatTime(timestamp) }}</span>
       </div>
       <div class="msg-content" ref="contentRef">
-        <div v-if="streaming" class="streaming-loader">
-          <span class="dot" /><span class="dot" /><span class="dot" />
-          <span class="typing-cursor" />
-        </div>
-        <span v-else v-html="renderedContent" />
+        <span v-html="renderedContent" />
+        <span v-if="streaming" class="typing-cursor" />
       </div>
     </div>
   </div>
@@ -24,7 +21,7 @@
 
 <script setup>
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
-import { safeMarkdown } from '../marked-setup.js'
+import { safeMarkdown, safeStreamingMarkdown } from '../marked-setup.js'
 
 const props = defineProps({
   role: String, content: String, providerName: String,
@@ -35,8 +32,10 @@ const props = defineProps({
 const contentRef = ref(null)
 
 const renderedContent = computed(() => {
-  if (!props.content) return ''
-  return safeMarkdown(props.content)
+  if (!props.content) return '<span class="streaming-placeholder">思考中…</span>'
+  // During streaming: render complete paragraphs as markdown, in-progress paragraph as plain text
+  // After streaming: render full markdown
+  return props.streaming ? safeStreamingMarkdown(props.content) : safeMarkdown(props.content)
 })
 
 // Copy button DOM handlers
@@ -189,25 +188,11 @@ function formatTime(ts) {
 .msg-content :deep(a) { color: var(--accent); text-underline-offset: 2px; }
 .msg-content :deep(a:hover) { color: var(--accent-hover); }
 
-/* --- Streaming loader --- */
-.streaming-loader {
-  display: flex; align-items: center; gap: 5px; padding: 4px 0;
-}
-.streaming-loader .dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--accent); opacity: 0.4;
-  animation: dotPulse 1.4s ease-in-out infinite;
-}
-.streaming-loader .dot:nth-child(2) { animation-delay: 0.2s; }
-.streaming-loader .dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes dotPulse {
-  0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
-  40% { opacity: 1; transform: scale(1.2); }
-}
-
+/* --- Streaming --- */
+.streaming-placeholder { color: var(--text-muted); font-style: italic; }
 .typing-cursor {
   display: inline-block; width: 2px; height: 18px;
-  background: var(--accent); margin-left: 6px; vertical-align: text-bottom;
+  background: var(--accent); margin-left: 2px; vertical-align: text-bottom;
   animation: blink 0.8s step-end infinite; border-radius: 1px;
 }
 @keyframes blink { 50% { opacity: 0; } }
@@ -227,5 +212,4 @@ function formatTime(ts) {
 .compact .msg-content :deep(p) { margin: 0 0 6px 0; }
 .compact .msg-content :deep(pre) { font-size: 12px; }
 .compact .msg-content :deep(blockquote) { font-size: 12px; }
-.compact .streaming-loader { padding: 2px 0; }
 </style>
