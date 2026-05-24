@@ -16,42 +16,54 @@ export function sendMessageStream(chatRequest, { onToken, onDone, onError }) {
     body: JSON.stringify(chatRequest)
   }).then(response => {
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
-    const reader = response.body.getReader()
-    const decoder = new TextDecoder()
-    let buffer = ''
 
-    function read() {
-      if (finished) return
-      reader.read().then(({ done, value }) => {
+    // Wrap stream reading in a Promise that resolves only when the stream
+    // completes (SSE event:done or reader done), NOT when the first chunk arrives.
+    return new Promise((resolve, reject) => {
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      function read() {
         if (finished) return
-        if (done) { finished = true; onDone(); return }
-        buffer += decoder.decode(value, { stream: true })
-        const lines = buffer.split('\n')
-        buffer = lines.pop() || ''
-        let currentEvent = null
-        for (const line of lines) {
-          if (line.startsWith('event:')) {
-            currentEvent = line.slice(6).trim()
-          } else if (line.startsWith('data:')) {
-            const data = line.slice(5).trim()
-            if (currentEvent === 'token') {
-              onToken(data)
-            } else if (currentEvent === 'done' || data === '[DONE]') {
-              finished = true
-              onDone()
-              return
+        reader.read().then(({ done, value }) => {
+          if (finished) return
+          if (done) {
+            finished = true
+            onDone()
+            resolve()
+            return
+          }
+          buffer += decoder.decode(value, { stream: true })
+          const lines = buffer.split('\n')
+          buffer = lines.pop() || ''
+          let currentEvent = null
+          for (const line of lines) {
+            if (line.startsWith('event:')) {
+              currentEvent = line.slice(6).trim()
+            } else if (line.startsWith('data:')) {
+              const data = line.slice(5).trim()
+              if (currentEvent === 'token') {
+                onToken(data)
+              } else if (currentEvent === 'done' || data === '[DONE]') {
+                finished = true
+                onDone()
+                resolve()
+                return
+              }
             }
           }
-        }
-        read()
-      }).catch(err => {
-        if (!finished) {
-          finished = true
-          onError(err)
-        }
-      })
-    }
-    read()
+          read()
+        }).catch(err => {
+          if (!finished) {
+            finished = true
+            onError(err)
+            reject(err)
+          }
+        })
+      }
+      read()
+    })
   }).catch(onError)
 }
 
