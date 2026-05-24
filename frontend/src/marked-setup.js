@@ -33,16 +33,28 @@ marked.use({ extensions: [codeExtension] })
 /**
  * Safe parse — wraps marked.parse() in try-catch so incomplete
  * streaming markdown never crashes the app.
+ *
+ * Fallback: if full parse fails, split on \n\n and parse each paragraph
+ * individually. If even that fails, escape and wrap in <p> tags.
  */
 export function safeMarkdown(content) {
   if (!content) return ''
   try {
     return marked.parse(content)
   } catch (e) {
-    console.warn('Markdown parse error:', e.message)
-    // Fallback: escape HTML and wrap in paragraphs
-    const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    return escaped.split('\n\n').map(p => `<p>${p}</p>`).join('')
+    // Try paragraph-by-paragraph fallback before giving up
+    try {
+      const parts = content.split(/\n\n/)
+      return parts.map(p => {
+        try { return marked.parse(p) } catch (_) {
+          return '<p>' + p.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</p>'
+        }
+      }).join('')
+    } catch (_) {
+      console.warn('Markdown parse error:', e.message)
+      const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      return escaped.split('\n\n').map(p => `<p>${p}</p>`).join('')
+    }
   }
 }
 

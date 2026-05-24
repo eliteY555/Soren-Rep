@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mvn package *)",
+      "Bash(java -jar voice-assistant-web/target/voice-assistant-web-1.0.0-SNAPSHOT.jar)",
+      "Bash(echo \"Backend starting, PID: $!\")",
+      "Bash(node -e ' *)"
+    ]
+  }
+}

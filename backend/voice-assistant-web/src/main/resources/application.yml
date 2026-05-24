@@ -29,7 +29,7 @@ spring:
 
 # --- Pinecone Vector Database ---
 pinecone:
-  api-key: ${PINECONE_API_KEY:your-pinecone-api-key}
+  api-key: ${PINECONE_KEY:your-pinecone-api-key}
   index: ${PINECONE_INDEX:job-assistant}
 
 # --- Embedding Model (Qwen DashScope, OpenAI-compatible endpoint) ---

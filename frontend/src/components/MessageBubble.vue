@@ -31,21 +31,10 @@ const props = defineProps({
 
 const contentRef = ref(null)
 
-// Escape HTML for safe plain-text display during streaming
-function plainText(content) {
-  if (!content) return '<span class="streaming-placeholder">思考中…</span>'
-  return content
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/\n/g, '<br>')
-}
-
 const renderedContent = computed(() => {
   if (!props.content) return '<span class="streaming-placeholder">思考中…</span>'
-  // During streaming: plain text only — zero markdown parsing to avoid artifacts
-  // After streaming (done/full): full markdown rendering
-  return props.streaming ? plainText(props.content) : safeMarkdown(props.content)
+  // Always use full markdown rendering — safeMarkdown catches parse errors internally
+  return safeMarkdown(props.content)
 })
 
 // Copy button DOM handlers
