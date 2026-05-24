@@ -9,7 +9,7 @@
       @touchstart.prevent="isPTT ? $emit('start') : null"
       @touchend.prevent="isPTT ? $emit('stop') : null"
       @click="!isPTT ? (isListening ? $emit('stop') : $emit('start')) : null"
-      :title="isPTT ? '按住说话，松开发送' : (isListening ? '点击停止' : '点击开始')"
+      :title="mode === 'system' ? (isListening ? '停止捕获系统音频' : '开始捕获系统音频') : isPTT ? '按住说话，松开发送' : (isListening ? '点击停止' : '点击开始')"
     >
       <div class="mic-ring" :class="{ active: isListening }" />
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -22,7 +22,7 @@
       <el-tag type="danger" size="small">浏览器不支持语音识别</el-tag>
     </div>
     <div v-if="isListening" class="recording-info">
-      <span class="rec-text">{{ isPTT ? '松开发送' : '监听中' }}</span>
+      <span class="rec-text">{{ mode === 'system' ? '捕获系统音频中' : isPTT ? '松开发送' : '监听中' }}</span>
       <span class="rec-time">{{ elapsed }}</span>
       <div class="volume-bars">
         <span v-for="i in 5" :key="i" class="bar" :style="{ animationDelay: i * 0.12 + 's' }" />
@@ -33,7 +33,7 @@
 
 <script setup>
 import { ref, watch, onUnmounted } from 'vue'
-const props = defineProps({ isSupported: Boolean, isListening: Boolean, isPTT: Boolean })
+const props = defineProps({ isSupported: Boolean, isListening: Boolean, isPTT: Boolean, mode: String })
 defineEmits(['start', 'stop'])
 
 const elapsed = ref('00:00')

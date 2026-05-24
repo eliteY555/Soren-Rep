@@ -40,7 +40,7 @@
         </div>
         <div class="topbar-right">
           <el-button size="small" text @click="toggleSpeechMode" class="mode-toggle">
-            {{ speech.mode.value === 'ptt' ? '实时模式' : '按键模式' }}
+            {{ speechMode === 'ptt' ? '按键说话' : speechMode === 'mic-stream' ? '实时麦克风' : '系统音频' }}
           </el-button>
           <el-button size="small" text :icon="Setting" @click="showProviderDialog = true" class="settings-btn" />
         </div>
@@ -51,11 +51,12 @@
       <footer class="input-area">
         <div class="input-row">
           <VoiceButton
-            :isSupported="speech.isSupported.value"
-            :isListening="speech.isListening.value"
-            :isPTT="speech.mode.value === 'ptt'"
-            @start="speech.startListening()"
-            @stop="speech.stopListening()"
+            :isSupported="(speechMode === 'system' ? sysSpeech.isSupported.value : micSpeech.isSupported.value)"
+            :isListening="(speechMode === 'system' ? sysSpeech.isListening.value : micSpeech.isListening.value)"
+            :isPTT="speechMode === 'ptt'"
+            :mode="speechMode"
+            @start="onVoiceStart()"
+            @stop="onVoiceStop()"
           />
 
           <div class="text-input-wrap">
@@ -100,11 +101,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Setting } from '@element-plus/icons-vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
 import { useSpeech } from '../composables/useSpeech'
+import { useSystemSpeech } from '../composables/useSystemSpeech'
 import ChatPanel from '../components/ChatPanel.vue'
 import VoiceButton from '../components/VoiceButton.vue'
 import SessionList from '../components/SessionList.vue'
@@ -125,10 +127,11 @@ const miniOpen = ref(false)
 let miniWindow = null
 let closeWatcher = null
 
-// Voice → input directly, no intermediate preview bar
-const speech = useSpeech((text) => {
-  textInput.value = text
-})
+// Three voice modes: ptt (mic push-to-talk), mic-stream (mic continuous), system (output audio)
+const speechMode = ref('ptt')
+
+const micSpeech = useSpeech((text) => { textInput.value = text })
+const sysSpeech = useSystemSpeech((text) => { textInput.value = text })
 
 function openMiniWindow() {
   if (miniWindow && !miniWindow.closed) {
@@ -170,8 +173,36 @@ onUnmounted(() => {
 })
 
 function toggleSpeechMode() {
-  speech.setMode(speech.mode.value === 'ptt' ? 'streaming' : 'ptt')
+  // Cycle: ptt → mic-stream → system → ptt
+  if (speechMode.value === 'ptt') {
+    micSpeech.setMode('streaming')
+    speechMode.value = 'mic-stream'
+  } else if (speechMode.value === 'mic-stream') {
+    // Stop mic before switching to system mode
+    if (micSpeech.isListening.value) micSpeech.stopListening()
+    speechMode.value = 'system'
+  } else {
+    if (sysSpeech.isListening.value) sysSpeech.stopListening()
+    micSpeech.setMode('ptt')
+    speechMode.value = 'ptt'
+  }
   textInput.value = ''
+}
+
+function onVoiceStart() {
+  if (speechMode.value === 'system') {
+    sysSpeech.startListening()
+  } else {
+    micSpeech.startListening()
+  }
+}
+
+function onVoiceStop() {
+  if (speechMode.value === 'system') {
+    sysSpeech.stopListening()
+  } else {
+    micSpeech.stopListening()
+  }
 }
 
 function sendText() {

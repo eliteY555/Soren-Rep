@@ -6,7 +6,9 @@
       "Bash(echo \"Backend starting, PID: $!\")",
       "Bash(node -e ' *)",
       "Bash(node -c src/services/api.js)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(cd \"D:/y-space/PROJECT/Job-Assistant/frontend\" && npm run build 2>&1 | tail -5 && echo \"--- FRONTEND OK ---\" && cd ../backend && mvn compile -q 2>&1 | tail -5 && echo \"--- BACKEND OK ---\")",
+      "Read(//d/y-space/PROJECT/**)"
     ]
   }
 }
