@@ -109,34 +109,38 @@ export const useChatStore = defineStore('chat', () => {
     streamingContent.value = ''
     const aiIndex = messages.value.length - 1
 
-    await api.sendMessageStream(
-      { sessionId: currentSessionId.value, content, mode, providerId },
-      {
-        onToken(token) {
-          streamingContent.value += token
-          // Progressive update — MessageBubble uses safeStreamingMarkdown during streaming
-          const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
-          messages.value = arr
-        },
-        onDone() {
-          const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value, streaming: false }
-          messages.value = arr
-          isStreaming.value = false
-          streamingContent.value = ''
-          loadSessions()
-          broadcast('message-sent')
-        },
-        onError(err) {
-          console.error('Stream error:', err)
-          const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message, streaming: false }
-          messages.value = arr
-          isStreaming.value = false
+    try {
+      await api.sendMessageStream(
+        { sessionId: currentSessionId.value, content, mode, providerId },
+        {
+          onToken(token) {
+            streamingContent.value += token
+            try {
+              const arr = [...messages.value]
+              arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value }
+              messages.value = arr
+            } catch (e) { /* skip bad frame, keep accumulating */ }
+          },
+          onDone() {
+            const arr = [...messages.value]
+            arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value, streaming: false }
+            messages.value = arr
+            loadSessions()
+            broadcast('message-sent')
+          },
+          onError(err) {
+            console.error('Stream error:', err)
+            const arr = [...messages.value]
+            arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message, streaming: false }
+            messages.value = arr
+          }
         }
-      }
-    )
+      )
+    } finally {
+      // Guarantee input is always re-enabled regardless of any error path
+      isStreaming.value = false
+      streamingContent.value = ''
+    }
   }
 
   return {
