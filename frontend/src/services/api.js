@@ -8,6 +8,8 @@ const http = axios.create({
 // --- Chat API ---
 
 export function sendMessageStream(chatRequest, { onToken, onDone, onError }) {
+  let finished = false
+
   return fetch('/api/chat/send', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -19,8 +21,10 @@ export function sendMessageStream(chatRequest, { onToken, onDone, onError }) {
     let buffer = ''
 
     function read() {
+      if (finished) return
       reader.read().then(({ done, value }) => {
-        if (done) { onDone(); return }
+        if (finished) return
+        if (done) { finished = true; onDone(); return }
         buffer += decoder.decode(value, { stream: true })
         const lines = buffer.split('\n')
         buffer = lines.pop() || ''
@@ -33,13 +37,19 @@ export function sendMessageStream(chatRequest, { onToken, onDone, onError }) {
             if (currentEvent === 'token') {
               onToken(data)
             } else if (currentEvent === 'done' || data === '[DONE]') {
+              finished = true
               onDone()
               return
             }
           }
         }
         read()
-      }).catch(onError)
+      }).catch(err => {
+        if (!finished) {
+          finished = true
+          onError(err)
+        }
+      })
     }
     read()
   }).catch(onError)

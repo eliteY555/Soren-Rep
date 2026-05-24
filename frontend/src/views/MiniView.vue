@@ -93,10 +93,13 @@ onMounted(async () => {
   configStore.restoreMode()
   await chatStore.loadSessions()
 
+  // Primary sync: sessionStorage (synchronous copy from opener)
   const savedId = sessionStorage.getItem('ai-active-session')
   if (savedId) {
     await chatStore.switchSession(savedId)
   }
+  // Fallback: BroadcastChannel (handles edge case where sessionStorage is empty)
+  chatStore.broadcast('mini-ready')
 })
 
 // Scroll to bottom on new messages
