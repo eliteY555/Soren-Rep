@@ -92,12 +92,6 @@
           </button>
         </div>
 
-        <div v-if="speech.transcript.value || speech.interimTranscript.value" class="transcript-preview">
-          <span class="final-text">{{ speech.transcript.value }}</span>
-          <span class="interim-text">{{ speech.interimTranscript.value }}</span>
-          <button class="transcript-action" @click="sendTranscript">发送</button>
-          <button class="transcript-action muted" @click="speech.clearTranscript()">清除</button>
-        </div>
       </footer>
     </main>
 
@@ -106,7 +100,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Setting } from '@element-plus/icons-vue'
 import { useChatStore } from '../stores/chatStore'
 import { useConfigStore } from '../stores/configStore'
@@ -121,7 +115,6 @@ import ProviderDialog from '../components/ProviderDialog.vue'
 
 const chatStore = useChatStore()
 const configStore = useConfigStore()
-const speech = useSpeech()
 
 const textInput = ref('')
 const sidebarTab = ref('chat')
@@ -131,6 +124,11 @@ const miniOpen = ref(false)
 
 let miniWindow = null
 let closeWatcher = null
+
+// Voice → input directly, no intermediate preview bar
+const speech = useSpeech((text) => {
+  textInput.value = text
+})
 
 function openMiniWindow() {
   if (miniWindow && !miniWindow.closed) {
@@ -171,25 +169,15 @@ onUnmounted(() => {
   if (closeWatcher) clearInterval(closeWatcher)
 })
 
-watch(() => speech.transcript.value, (val) => {
-  if (val) textInput.value = val
-})
-
 function toggleSpeechMode() {
   speech.setMode(speech.mode.value === 'ptt' ? 'streaming' : 'ptt')
+  textInput.value = ''
 }
 
 function sendText() {
   const content = textInput.value.trim()
   if (!content) return
   textInput.value = ''
-  chatStore.sendMessage(content, configStore.chatMode, configStore.activeProviderId)
-}
-
-function sendTranscript() {
-  const content = speech.transcript.value.trim()
-  if (!content) return
-  speech.clearTranscript()
   chatStore.sendMessage(content, configStore.chatMode, configStore.activeProviderId)
 }
 </script>
@@ -270,16 +258,4 @@ function sendTranscript() {
 .mini-toggle-btn:hover { background: var(--bg-hover); color: var(--accent); }
 .mini-toggle-btn.active { background: var(--accent-soft); color: var(--accent); }
 
-/* Transcript preview */
-.transcript-preview {
-  margin-top: 10px; padding: 10px 14px;
-  background: var(--accent-soft); border: 1px solid rgba(34,197,94,0.2);
-  border-radius: var(--radius-sm); font-size: 14px;
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-}
-.final-text { color: var(--text-primary); }
-.interim-text { color: var(--text-muted); font-style: italic; }
-.transcript-action { background: none; border: none; color: var(--accent); font-size: 13px; cursor: pointer; font-family: inherit; }
-.transcript-action.muted { color: var(--text-muted); }
-.transcript-action:hover { text-decoration: underline; }
 </style>

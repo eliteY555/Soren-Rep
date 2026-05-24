@@ -83,10 +83,13 @@ import VoiceButton from '../components/VoiceButton.vue'
 
 const chatStore = useChatStore()
 const configStore = useConfigStore()
-const speech = useSpeech()
 
 const textInput = ref('')
 const bottomRef = ref(null)
+
+const speech = useSpeech((text) => {
+  textInput.value = text
+})
 
 onMounted(async () => {
   await configStore.loadProviders()
@@ -111,10 +114,6 @@ watch(() => {
   return msgs && msgs.length ? msgs[msgs.length - 1].content : ''
 }, () => {
   nextTick(() => bottomRef.value?.scrollIntoView({ behavior: 'smooth' }))
-})
-
-watch(() => speech.transcript.value, (val) => {
-  if (val) textInput.value = val
 })
 
 function sendText() {

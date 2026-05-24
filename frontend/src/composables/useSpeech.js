@@ -1,55 +1,82 @@
-import { ref, onUnmounted } from 'vue'
+import { ref } from 'vue'
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
 
-export function useSpeech() {
+/**
+ * Web Speech API wrapper — optimized for speed and accuracy.
+ *
+ * @param {Function} onText - callback(text) called on every recognition update.
+ *        The consumer writes directly to the input, no watcher overhead.
+ */
+export function useSpeech(onText) {
   const isSupported = ref(!!SpeechRecognition)
   const isListening = ref(false)
-  const transcript = ref('')
-  const interimTranscript = ref('')
   const mode = ref('ptt') // 'ptt' | 'streaming'
   const error = ref(null)
 
   let recognition = null
+  let silenceTimer = null
+  let fullText = ''
+  const SILENCE_TIMEOUT = 2500 // auto-stop after 2.5s of silence (streaming mode)
 
   function createRecognition() {
     if (!SpeechRecognition) return null
     const rec = new SpeechRecognition()
     rec.lang = 'zh-CN'
     rec.interimResults = true
-    rec.continuous = mode.value === 'streaming'
-    rec.maxAlternatives = 1
+    rec.continuous = true      // always continuous → faster re-recognition
+    rec.maxAlternatives = 1    // single best result → lower latency
 
     rec.onresult = (event) => {
       let interim = ''
       let final = ''
       for (let i = event.resultIndex; i < event.results.length; i++) {
-        const result = event.results[i]
-        if (result.isFinal) {
-          final += result[0].transcript
+        const r = event.results[i]
+        if (r.isFinal) {
+          final += r[0].transcript
         } else {
-          interim += result[0].transcript
+          interim += r[0].transcript
         }
       }
-      if (final) transcript.value += final
-      interimTranscript.value = interim
+      if (final) {
+        fullText += final
+        // Trim leading punctuation/spaces from accumulated text
+        fullText = fullText.replace(/^[，,。.！!？?；;：:\s]+/, '')
+      }
+
+      // Push combined text to consumer — one direct call, no watcher latency
+      const combined = fullText + interim
+      if (onText) onText(combined)
+
+      // Reset silence timer → auto-stop in streaming mode
+      if (silenceTimer) clearTimeout(silenceTimer)
+      if (isListening.value && mode.value === 'streaming') {
+        silenceTimer = setTimeout(() => {
+          if (isListening.value) stopListening()
+        }, SILENCE_TIMEOUT)
+      }
     }
 
     rec.onerror = (event) => {
-      // 'no-speech' and 'aborted' are normal in streaming mode, don't treat as errors
       if (event.error === 'no-speech' || event.error === 'aborted') {
         if (mode.value === 'streaming' && isListening.value) {
-          try { rec.start() } catch (e) { /* ignore */ }
+          setTimeout(() => {
+            try { rec.start() } catch (_) { isListening.value = false }
+          }, 300)
           return
         }
+        if (event.error === 'aborted') return // normal PTT stop
       }
       error.value = event.error
       isListening.value = false
     }
 
     rec.onend = () => {
+      if (silenceTimer) clearTimeout(silenceTimer)
       if (mode.value === 'streaming' && isListening.value) {
-        try { rec.start() } catch (e) { isListening.value = false }
+        setTimeout(() => {
+          try { rec.start() } catch (_) { isListening.value = false }
+        }, 200)
       } else {
         isListening.value = false
       }
@@ -64,46 +91,44 @@ export function useSpeech() {
       return
     }
     error.value = null
-    // In PTT mode, clear transcript for fresh start
+    // PTT: fresh start each press
     if (mode.value === 'ptt') {
-      transcript.value = ''
+      fullText = ''
+      if (onText) onText('')
     }
-    interimTranscript.value = ''
+    // Streaming: keep previous text, continue accumulating
 
     recognition = createRecognition()
     if (recognition) {
-      recognition.start()
-      isListening.value = true
+      try {
+        recognition.start()
+        isListening.value = true
+      } catch (e) {
+        error.value = 'start failed'
+      }
     }
   }
 
   function stopListening() {
     isListening.value = false
+    if (silenceTimer) clearTimeout(silenceTimer)
     if (recognition) {
-      recognition.stop()
+      try { recognition.stop() } catch (_) { /* already stopped */ }
     }
   }
 
   function setMode(newMode) {
     mode.value = newMode
     if (recognition) {
-      recognition.stop()
+      try { recognition.stop() } catch (_) { /* ignore */ }
       isListening.value = false
     }
+    fullText = ''
+    if (onText) onText('')
   }
-
-  function clearTranscript() {
-    transcript.value = ''
-    interimTranscript.value = ''
-  }
-
-  onUnmounted(() => {
-    isListening.value = false
-    if (recognition) recognition.stop()
-  })
 
   return {
-    isSupported, isListening, transcript, interimTranscript, mode, error,
-    startListening, stopListening, setMode, clearTranscript
+    isSupported, isListening, mode, error,
+    startListening, stopListening, setMode
   }
 }
