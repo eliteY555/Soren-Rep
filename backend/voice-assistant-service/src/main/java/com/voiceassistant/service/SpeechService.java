@@ -58,12 +58,14 @@ public class SpeechService {
         try {
             String base64Audio = Base64.getEncoder().encodeToString(audioBytes);
 
+            String fmt = format != null ? format : "wav";
             Map<String, Object> body = Map.of(
                     "model", model,
                     "input", Map.of("audio", base64Audio),
                     "parameters", Map.of(
-                            "format", format != null ? format : "webm",
-                            "sample_rate", 16000
+                            "format", fmt,
+                            "sample_rate", 16000,
+                            "language_hints", java.util.List.of("zh", "en")
                     )
             );
 
