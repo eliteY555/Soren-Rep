@@ -121,9 +121,7 @@ export const useChatStore = defineStore('chat', () => {
         },
         onDone() {
           const arr = [...messages.value]
-          const item = { ...arr[aiIndex], content: streamingContent.value }
-          delete item.streaming
-          arr[aiIndex] = item
+          arr[aiIndex] = { ...arr[aiIndex], content: streamingContent.value, streaming: false }
           messages.value = arr
           isStreaming.value = false
           streamingContent.value = ''
@@ -133,8 +131,7 @@ export const useChatStore = defineStore('chat', () => {
         onError(err) {
           console.error('Stream error:', err)
           const arr = [...messages.value]
-          arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message }
-          delete arr[aiIndex].streaming
+          arr[aiIndex] = { ...arr[aiIndex], content: '请求失败: ' + err.message, streaming: false }
           messages.value = arr
           isStreaming.value = false
         }

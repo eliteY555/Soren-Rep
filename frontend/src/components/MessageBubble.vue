@@ -21,7 +21,7 @@
 
 <script setup>
 import { computed, ref, watch, nextTick, onMounted } from 'vue'
-import { safeMarkdown, safeStreamingMarkdown } from '../marked-setup.js'
+import { safeMarkdown } from '../marked-setup.js'
 
 const props = defineProps({
   role: String, content: String, providerName: String,
@@ -31,11 +31,21 @@ const props = defineProps({
 
 const contentRef = ref(null)
 
+// Escape HTML for safe plain-text display during streaming
+function plainText(content) {
+  if (!content) return '<span class="streaming-placeholder">思考中…</span>'
+  return content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\n/g, '<br>')
+}
+
 const renderedContent = computed(() => {
   if (!props.content) return '<span class="streaming-placeholder">思考中…</span>'
-  // During streaming: render complete paragraphs as markdown, in-progress paragraph as plain text
-  // After streaming: render full markdown
-  return props.streaming ? safeStreamingMarkdown(props.content) : safeMarkdown(props.content)
+  // During streaming: plain text only — zero markdown parsing to avoid artifacts
+  // After streaming (done/full): full markdown rendering
+  return props.streaming ? plainText(props.content) : safeMarkdown(props.content)
 })
 
 // Copy button DOM handlers
