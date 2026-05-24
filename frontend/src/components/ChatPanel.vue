@@ -16,7 +16,16 @@
       </div>
     </div>
     <div class="messages-container">
-      <MessageBubble v-for="(msg, idx) in messages" :key="idx" v-bind="msg" />
+      <MessageBubble
+        v-for="(msg, idx) in messages"
+        :key="idx"
+        :role="msg.role"
+        :content="msg.content"
+        :provider-name="msg.providerName"
+        :mode="msg.mode"
+        :streaming="msg.streaming"
+        :timestamp="msg.timestamp"
+      />
     </div>
     <div ref="bottomRef" />
   </div>
