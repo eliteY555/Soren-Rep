@@ -5,7 +5,8 @@
       "Bash(java -jar voice-assistant-web/target/voice-assistant-web-1.0.0-SNAPSHOT.jar)",
       "Bash(echo \"Backend starting, PID: $!\")",
       "Bash(node -e ' *)",
-      "Bash(node -c src/services/api.js)"
+      "Bash(node -c src/services/api.js)",
+      "Bash(git push *)"
     ]
   }
 }

@@ -73,7 +73,7 @@ export const useChatStore = defineStore('chat', () => {
   async function createNewSession() {
     const session = await api.createSession()
     sessions.value.unshift(session)
-    switchSession(session.id)
+    await switchSession(session.id)
     return session
   }
 
