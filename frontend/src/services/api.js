@@ -23,6 +23,23 @@ export function sendMessageStream(chatRequest, { onToken, onDone, onError }) {
       const reader = response.body.getReader()
       const decoder = new TextDecoder()
       let buffer = ''
+      // Persist across chunks — events span multiple reads
+      let eventType = null
+      let dataLines = []
+
+      function flush() {
+        if (dataLines.length === 0 || !eventType) return
+        const data = dataLines.join('\n')
+        if (eventType === 'token') {
+          onToken(data)
+        } else if (eventType === 'done' || data === '[DONE]') {
+          finished = true
+          onDone()
+          resolve()
+        }
+        dataLines = []
+        eventType = null
+      }
 
       function read() {
         if (finished) return
@@ -37,20 +54,18 @@ export function sendMessageStream(chatRequest, { onToken, onDone, onError }) {
           buffer += decoder.decode(value, { stream: true })
           const lines = buffer.split('\n')
           buffer = lines.pop() || ''
-          let currentEvent = null
-          for (const line of lines) {
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i]
             if (line.startsWith('event:')) {
-              currentEvent = line.slice(6).trim()
+              flush()
+              eventType = line.slice(6).trim()
+              dataLines = []
             } else if (line.startsWith('data:')) {
-              const data = line.slice(5).trim()
-              if (currentEvent === 'token') {
-                onToken(data)
-              } else if (currentEvent === 'done' || data === '[DONE]') {
-                finished = true
-                onDone()
-                resolve()
-                return
-              }
+              dataLines.push(line.slice(5))
+            } else if (line === '' && dataLines.length > 0) {
+              // Empty line = SSE event boundary, flush current event
+              flush()
             }
           }
           read()
