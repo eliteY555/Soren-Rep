@@ -212,7 +212,6 @@
 
 <script>
 import { update } from "@/api/auth";
-import { Encrypt } from "@/utils/secret";
 import cities from "@/assets/data/cities.js";
 import { updatePatientInfo, getPatientInfo, createPatientInfo } from "@/api/patient"
 import { updateDoctorInfo, getDoctorInfo } from "@/api/doctor"
@@ -370,8 +369,8 @@ export default {
             
             // 只有当两个密码字段都填写时，才包含密码信息
             if (this.userInfo.oldPassword && this.userInfo.newPassword) {
-              updateData.oldPassword = Encrypt(this.userInfo.oldPassword);
-              updateData.newPassword = Encrypt(this.userInfo.newPassword);
+              updateData.oldPassword = this.userInfo.oldPassword;
+              updateData.newPassword = this.userInfo.newPassword;
             } else if ((this.userInfo.oldPassword && !this.userInfo.newPassword) || 
                       (!this.userInfo.oldPassword && this.userInfo.newPassword)) {
               // 如果只填写了一个密码字段，提示用户

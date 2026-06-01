@@ -13,9 +13,9 @@
           <el-radio :label="1">医师</el-radio>
         </el-radio-group>
       </el-form-item>
-      <el-form-item label="用户名" prop="username">
+      <el-form-item label="姓名" prop="username">
         <el-input
-          placeholder="请输入用户名"
+          placeholder="请输入姓名"
           v-model="ruleForm.username"
           clearable
           autocomplete="off"
@@ -85,7 +85,6 @@
 <script>
 import { patientRegister } from "@/api/patient";
 import { doctorRegister } from "@/api/doctor";
-import { Encrypt } from "@/utils/secret";
 export default {
   components: {},
   data() {
@@ -118,7 +117,7 @@ export default {
           { required: true, message: "请选择用户角色", trigger: "change" },
         ],
         username: [
-          { required: true, message: "请输入用户名", trigger: "blur" },
+          { required: true, message: "请输入姓名", trigger: "blur" },
         ],
         password: [
             { required: true, message: "请输入密码", trigger: "blur" },
@@ -193,14 +192,13 @@ export default {
         if (valid) {
           try {
             this.loading = true;
-            // 对密码进行加密
-            const password = Encrypt(this.ruleForm.password);
+            // 密码明文传输，服务端 BCrypt 哈希存储
+            const password = this.ruleForm.password;
 
             if (this.ruleForm.role === 0) {
               // 患者注册：直接写入 patient 表
               const patientData = {
                 patientName: this.ruleForm.username,
-                username: this.ruleForm.username,
                 password,
                 phone: this.ruleForm.phone,
                 email: this.ruleForm.email,
@@ -221,7 +219,6 @@ export default {
               // 医生注册：直接写入 doctor 表
               const doctorData = {
                 doctorName: this.ruleForm.username,
-                username: this.ruleForm.username,
                 password,
                 phone: this.ruleForm.phone,
                 email: this.ruleForm.email,

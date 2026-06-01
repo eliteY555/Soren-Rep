@@ -3,7 +3,7 @@ module.exports = {
   outputDir: 'dist',
   assetsDir: 'static',
   productionSourceMap: false,
-  devServer: { 
+  devServer: {
     port: 8080,
     hot: true,
     client: {
@@ -11,7 +11,6 @@ module.exports = {
         errors: true,
         warnings: false,
       },
-      // 解决 WebSocket 连接问题
       webSocketURL: {
         hostname: 'localhost',
         pathname: '/ws',
@@ -21,16 +20,28 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:9999', // 配置好的后端接口地址
-        // 允许跨域
+        target: 'http://localhost:9999',
         changeOrigin: true,
         ws: true,
         pathRewrite: {
-          '^/api': '' // 以'/api'开头的url会进行接口转发
+          '^/api': ''
+        },
+        // === SSE 流式响应：禁用代理缓冲 ===
+        onProxyReq: (proxyReq, req, res) => {
+          if (req.url && req.url.includes('/agent/chat')) {
+            proxyReq.setHeader('X-Accel-Buffering', 'no');
+            proxyReq.setHeader('Cache-Control', 'no-cache');
+          }
+        },
+        onProxyRes: (proxyRes, req, res) => {
+          if (req.url && req.url.includes('/agent/chat')) {
+            proxyRes.headers['cache-control'] = 'no-cache, no-transform';
+            proxyRes.headers['x-accel-buffering'] = 'no';
+            proxyRes.headers['connection'] = 'keep-alive';
+          }
         }
       }
     },
   },
-  // 禁用 eslint 检查
   lintOnSave: false,
 }

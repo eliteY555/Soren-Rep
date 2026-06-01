@@ -5,7 +5,6 @@ USE medicine;
 create table patient (
     patientId integer not null auto_increment,
     patientName varchar(50) not null comment '患者姓名',
-    username varchar(255) not null comment '用户名',
     password varchar(255) not null comment '密码',
     phone varchar(11) not null comment '手机号码',
     email varchar(255) not null comment '电子邮箱',
@@ -22,7 +21,6 @@ create table patient (
 create table doctor (
     doctorId integer not null auto_increment,
     doctorName varchar(50) not null comment '医生姓名',
-    username varchar(255) not null comment '用户名',
     password varchar(255) not null comment '密码',
     phone varchar(11) not null comment '手机号码',
     email varchar(255) not null comment '电子邮箱',

@@ -15,7 +15,7 @@ import java.util.Map;
 
 /**
  * 统一认证控制器
- * 根据 phone+password 分别在 patient 表和 doctor 表中查找，匹配任意一方即登录成功
+ * 先查 patient 表，再查 doctor 表，BCrypt 验证密码
  */
 @RestController
 @RequestMapping(value = "/auth")
@@ -26,14 +26,19 @@ public class AuthController {
     @Autowired
     private DoctorService doctorService;
 
+    /** 统一登录：手机号 + BCrypt 密码验证 */
     @PostMapping("/login")
     public Result login(@RequestBody Map<String, String> loginData) {
         String identity = loginData.get("identity"); // 手机号
-        String password = PasswordUtil.desEncrypt(loginData.get("password"));
+        String password = loginData.get("password");
+
+        if (identity == null || password == null) {
+            return Result.error("手机号和密码不能为空");
+        }
 
         // 先在 patient 表中查找
-        Patient patient = patientService.login(identity, password);
-        if (patient != null) {
+        Patient patient = patientService.findByPhone(identity);
+        if (patient != null && PasswordUtil.matches(password, patient.getPassword())) {
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("userId", patient.getPatientId());
             userInfo.put("username", patient.getPatientName());
@@ -44,8 +49,8 @@ public class AuthController {
         }
 
         // 再在 doctor 表中查找
-        Doctor doctor = doctorService.login(identity, password);
-        if (doctor != null) {
+        Doctor doctor = doctorService.findByPhone(identity);
+        if (doctor != null && PasswordUtil.matches(password, doctor.getPassword())) {
             Map<String, Object> userInfo = new HashMap<>();
             userInfo.put("userId", doctor.getDoctorId());
             userInfo.put("username", doctor.getDoctorName());
@@ -71,6 +76,7 @@ public class AuthController {
         return Result.error("用户不存在");
     }
 
+    /** 修改资料（支持修改密码） */
     @PostMapping("/update")
     public Result update(@RequestBody Map<String, String> data) {
         try {
@@ -82,44 +88,38 @@ public class AuthController {
             String oldPassword = data.get("oldPassword");
             String newPassword = data.get("newPassword");
 
-            if ("0".equals(role) || "0".equals(String.valueOf(role))) {
-                // 更新 patient 表
+            if ("0".equals(String.valueOf(role))) {
                 Patient patient = patientService.getPatientById(userId);
-                if (patient == null) {
-                    return Result.error("患者不存在");
-                }
-                // 验证旧密码
+                if (patient == null) return Result.error("患者不存在");
+
+                // BCrypt 验证旧密码
                 if (oldPassword != null && !oldPassword.isEmpty()) {
-                    String decryptedOld = PasswordUtil.desEncrypt(oldPassword);
-                    if (!patient.getPassword().equals(decryptedOld)) {
+                    if (!PasswordUtil.matches(oldPassword, patient.getPassword())) {
                         return Result.error("原密码错误");
+                    }
+                    if (newPassword != null && !newPassword.isEmpty()) {
+                        patient.setPassword(PasswordUtil.encode(newPassword));
                     }
                 }
                 patient.setPatientName(username);
                 patient.setPhone(phone);
                 patient.setEmail(email);
-                if (newPassword != null && !newPassword.isEmpty()) {
-                    patient.setPassword(PasswordUtil.desEncrypt(newPassword));
-                }
                 patientService.updateAccount(patient);
             } else {
-                // 更新 doctor 表
                 Doctor doctor = doctorService.getDoctorById(userId);
-                if (doctor == null) {
-                    return Result.error("医生不存在");
-                }
+                if (doctor == null) return Result.error("医生不存在");
+
                 if (oldPassword != null && !oldPassword.isEmpty()) {
-                    String decryptedOld = PasswordUtil.desEncrypt(oldPassword);
-                    if (!doctor.getPassword().equals(decryptedOld)) {
+                    if (!PasswordUtil.matches(oldPassword, doctor.getPassword())) {
                         return Result.error("原密码错误");
+                    }
+                    if (newPassword != null && !newPassword.isEmpty()) {
+                        doctor.setPassword(PasswordUtil.encode(newPassword));
                     }
                 }
                 doctor.setDoctorName(username);
                 doctor.setPhone(phone);
                 doctor.setEmail(email);
-                if (newPassword != null && !newPassword.isEmpty()) {
-                    doctor.setPassword(PasswordUtil.desEncrypt(newPassword));
-                }
                 doctorService.updateAccount(doctor);
             }
             return Result.success(true);

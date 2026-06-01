@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class Patient {
     private Integer patientId;
     private String patientName;
-    private String username;
     private String password;
     private String phone;
     private String email;

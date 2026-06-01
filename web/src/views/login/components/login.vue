@@ -49,7 +49,6 @@
 
 <script>
 import { login } from "@/api/auth";
-import { Encrypt } from "@/utils/secret";
 export default {
   components: {},
   data() {
@@ -75,16 +74,12 @@ export default {
         if (valid) {
           try {
             this.loading = true;
-            // 对密码进行加密
-            const password = Encrypt(this.ruleForm.password);
-            login({...this.ruleForm, password}).then(res => {
+            // 密码明文传输，服务端 BCrypt 验证
+            login({...this.ruleForm}).then(res => {
               if (res) {
                 // 登录成功，保存用户信息到Vuex
-                const userInfo = {
-                  ...res,
-                  password: Encrypt(res.password)
-                };
-                
+                const userInfo = { ...res };
+
                 // 先保存到Vuex
                 this.$store.dispatch('setUserInfo', userInfo);
                 

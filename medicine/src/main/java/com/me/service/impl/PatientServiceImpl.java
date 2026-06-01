@@ -1,5 +1,6 @@
 package com.me.service.impl;
 
+import com.me.mapper.DoctorMapper;
 import com.me.mapper.PatientMapper;
 import com.me.pojo.Patient;
 import com.me.service.PatientService;
@@ -10,6 +11,9 @@ import org.springframework.stereotype.Service;
 public class PatientServiceImpl implements PatientService {
     @Autowired
     private PatientMapper patientMapper;
+
+    @Autowired
+    private DoctorMapper doctorMapper;
 
     @Override
     public int updatePatientInfo(Patient patient) {
@@ -35,11 +39,6 @@ public class PatientServiceImpl implements PatientService {
     }
 
     @Override
-    public Patient login(String phone, String password) {
-        return patientMapper.findByPhoneAndPassword(phone, password);
-    }
-
-    @Override
     public Patient register(Patient patient) {
         patientMapper.insertPatientInfo(patient);
         return patient;
@@ -48,5 +47,11 @@ public class PatientServiceImpl implements PatientService {
     @Override
     public int updateAccount(Patient patient) {
         return patientMapper.updateAccount(patient);
+    }
+
+    @Override
+    public boolean isPhoneRegistered(String phone) {
+        return patientMapper.findByPhone(phone) != null
+                || doctorMapper.findByPhone(phone) != null;
     }
 }

@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 public class Doctor {
     private Integer doctorId;
     private String doctorName;
-    private String username;
     private String password;
     private String phone;
     private String email;

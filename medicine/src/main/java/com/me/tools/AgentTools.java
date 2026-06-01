@@ -4,12 +4,14 @@ import com.me.pojo.Patient;
 import com.me.pojo.Record;
 import com.me.service.PatientService;
 import com.me.service.RecordService;
+import com.me.utils.PasswordUtil;
 import dev.langchain4j.agent.tool.Tool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.security.SecureRandom;
 import java.util.Date;
 
 /**
@@ -32,7 +34,7 @@ public class AgentTools {
      * @param record 病例记录对象
      * @return 操作结果信息
      */
-    @Tool(name = "提交病例", value = "根据参数，在确保所需数据通过对话得到后，为用户执行病例的提交")
+    @Tool(name = "submit_medical_record", value = "Submit a medical record for the patient. Collect all required information through conversation before calling this tool.")
     public String upLoadRecord(Record record) {
         try {
             logger.info("开始提交病例，病例信息: {}", record);
@@ -69,10 +71,9 @@ public class AgentTools {
                     // 创建新患者
                     Patient newPatient = new Patient();
                     newPatient.setPatientName(record.getPatientName());
-                    newPatient.setUsername(record.getPatientName());
                     newPatient.setPhone(record.getPhone());
                     newPatient.setEmail(record.getPhone() + "@temp.com");
-                    newPatient.setPassword("123456"); // 默认密码
+                    newPatient.setPassword(PasswordUtil.encode(generateRandomPassword()));
                     newPatient.setSex(record.getSex());
                     newPatient.setAge(record.getAge());
                     newPatient.setOldHistory(record.getOldHistory());
@@ -114,5 +115,16 @@ public class AgentTools {
             logger.error("病例提交过程中发生异常", e);
             return "病例提交失败：" + e.getMessage();
         }
+    }
+
+    /** 生成 12 位随机安全密码 */
+    private String generateRandomPassword() {
+        String chars = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789@#$%";
+        SecureRandom random = new SecureRandom();
+        StringBuilder sb = new StringBuilder(12);
+        for (int i = 0; i < 12; i++) {
+            sb.append(chars.charAt(random.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }

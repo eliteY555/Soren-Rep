@@ -21,7 +21,5 @@ public interface DoctorMapper {
 
     Doctor findByPhone(String phone);
 
-    Doctor findByPhoneAndPassword(@Param("phone") String phone, @Param("password") String password);
-
     int updateAccount(Doctor doctor);
 }

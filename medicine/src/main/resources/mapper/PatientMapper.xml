@@ -6,11 +6,11 @@
 <mapper namespace="com.me.mapper.PatientMapper">
     <!-- 注册患者（含登录凭证） -->
     <insert id="insertPatientInfo" parameterType="Patient" useGeneratedKeys="true" keyProperty="patientId">
-        INSERT INTO patient (patientName, username, password, phone, email, sex, age, oldHistory, allergiesHistory, habits)
-        VALUES (#{patientName}, #{username}, #{password}, #{phone}, #{email}, #{sex}, #{age}, #{oldHistory}, #{allergiesHistory}, #{habits})
+        INSERT INTO patient (patientName, password, phone, email, sex, age, oldHistory, allergiesHistory, habits)
+        VALUES (#{patientName}, #{password}, #{phone}, #{email}, #{sex}, #{age}, #{oldHistory}, #{allergiesHistory}, #{habits})
     </insert>
 
-    <!-- 更新患者健康档案 -->
+    <!-- 更新患者健康档案（不含密码） -->
     <update id="updatePatientInfo" parameterType="Patient">
         UPDATE patient
         SET patientName = #{patientName},
@@ -23,25 +23,21 @@
         LIMIT 1
     </update>
 
-    <!-- 根据 patientId 查询患者信息 -->
+    <!-- 根据 patientId 查询患者信息（排除密码） -->
     <select id="getPatientById" parameterType="int" resultType="Patient">
-        SELECT * FROM patient WHERE patientId = #{patientId} LIMIT 1
+        SELECT patientId, patientName, phone, email, sex, age, oldHistory, allergiesHistory, habits
+        FROM patient WHERE patientId = #{patientId} LIMIT 1
     </select>
 
-    <!-- 通过手机号查找患者 -->
+    <!-- 通过手机号查找患者（含密码，仅用于登录验证） -->
     <select id="findByPhone" parameterType="String" resultType="Patient">
         SELECT * FROM patient WHERE phone = #{phone} LIMIT 1
-    </select>
-
-    <!-- 通过手机号和密码查找患者（登录） -->
-    <select id="findByPhoneAndPassword" resultType="Patient">
-        SELECT * FROM patient WHERE phone = #{phone} AND password = #{password} LIMIT 1
     </select>
 
     <!-- 更新患者账号信息 -->
     <update id="updateAccount" parameterType="Patient">
         UPDATE patient
-        SET username = #{username}, phone = #{phone}, email = #{email}
+        SET patientName = #{patientName}, phone = #{phone}, email = #{email}
         <if test="password != null and password != ''">, password = #{password}</if>
         WHERE patientId = #{patientId}
     </update>

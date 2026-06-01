@@ -10,11 +10,9 @@ import reactor.core.publisher.Flux;
 
 @AiService(
         wiringMode = AiServiceWiringMode.EXPLICIT,
-//        chatModel = "qwenChatModel",
-        streamingChatModel = "qwenStreamingChatModel",
+        streamingChatModel = "openAiStreamingChatModel",
         chatMemoryProvider = "MemoryProvider",
-        tools = "agentTools", //LLM 根据问题语义自动判断是否调用工具
-        contentRetriever = "contentRetrieverPinecone" //内容检索
+        tools = "agentTools"
 )
 
 public interface AgentAssistant {

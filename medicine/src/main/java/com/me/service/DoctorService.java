@@ -17,9 +17,10 @@ public interface DoctorService {
 
     Doctor findByPhone(String phone);
 
-    Doctor login(String phone, String password);
-
     Doctor register(Doctor doctor);
 
     int updateAccount(Doctor doctor);
+
+    /** 检查手机号是否已在医生或患者表中注册 */
+    boolean isPhoneRegistered(String phone);
 }

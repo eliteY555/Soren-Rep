@@ -1,51 +1,57 @@
+-- ═══════════════════════════════════════════════════════
+-- 种子数据（BCrypt 密码哈希方案）
+--
+-- 所有测试账号密码均为 "123456"，使用手机号登录
+-- ═══════════════════════════════════════════════════════
+
 -- 插入患者数据（含登录凭证 + 健康档案）
-INSERT INTO patient (patientName, username, phone, email, password, age, allergiesHistory, habits, oldHistory, sex) VALUES
-('张伟', '张伟', '13800138001', 'zhangw@example.com', 'e10adc3949ba59abbe56e057f20f883e', 45, '青霉素过敏', '吸烟20年，每日1包', '高血压10年', 0),
-('李娜', '李娜', '13800138002', 'lina@example.com', 'e10adc3949ba59abbe56e057f20f883e', 32, '无', '每周健身3次', '2018年阑尾炎手术', 1),
-('王芳', '王芳', '13800138003', 'wangf@example.com', 'e10adc3949ba59abbe56e057f20f883e', 28, '海鲜过敏', '素食主义者', '过敏性鼻炎', 1),
-('赵阳', '赵阳', '13800138004', 'zhaoy@example.com', 'e10adc3949ba59abbe56e057f20f883e', 67, '阿司匹林过敏', '每日晨练', '糖尿病、冠心病', 0),
-('陈静', '陈静', '13800138005', 'chenj@example.com', 'e10adc3949ba59abbe56e057f20f883e', 19, '花粉过敏', '大学生，作息规律', '无重大病史', 1),
-('刘洋', '刘洋', '13800138006', 'liuy@example.com', 'e10adc3949ba59abbe56e057f20f883e', 53, '无', 'IT从业者，久坐', '腰椎间盘突出', 0),
-('周梅', '周梅', '13800138007', 'zhoum@example.com', 'e10adc3949ba59abbe56e057f20f883e', 41, '头孢过敏', '教师，用嗓过度', '慢性咽炎', 1),
-('吴刚', '吴刚', '13800138008', 'wug@example.com', 'e10adc3949ba59abbe56e057f20f883e', 36, '无', '建筑工人，体力劳动大', '2019年骨折', 0),
-('郑雪', '郑雪', '13800138009', 'zhengx@example.com', 'e10adc3949ba59abbe56e057f20f883e', 29, '牛奶过敏', '护士，三班倒', '胃溃疡', 1),
-('孙明', '孙明', '13800138010', 'sunm@example.com', 'e10adc3949ba59abbe56e057f20f883e', 58, '磺胺类过敏', '退休教师', '高血压、高血脂', 0);
+INSERT INTO patient (patientName, phone, email, password, age, allergiesHistory, habits, oldHistory, sex) VALUES
+('张伟', '13800138001', 'zhangw@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 45, '青霉素过敏', '吸烟20年，每日1包', '高血压10年', 0),
+('李娜', '13800138002', 'lina@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 32, '无', '每周健身3次', '2018年阑尾炎手术', 1),
+('王芳', '13800138003', 'wangf@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 28, '海鲜过敏', '素食主义者', '过敏性鼻炎', 1),
+('赵阳', '13800138004', 'zhaoy@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 67, '阿司匹林过敏', '每日晨练', '糖尿病、冠心病', 0),
+('陈静', '13800138005', 'chenj@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 19, '花粉过敏', '大学生，作息规律', '无重大病史', 1),
+('刘洋', '13800138006', 'liuy@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 53, '无', 'IT从业者，久坐', '腰椎间盘突出', 0),
+('周梅', '13800138007', 'zhoum@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 41, '头孢过敏', '教师，用嗓过度', '慢性咽炎', 1),
+('吴刚', '13800138008', 'wug@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 36, '无', '建筑工人，体力劳动大', '2019年骨折', 0),
+('郑雪', '13800138009', 'zhengx@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 29, '牛奶过敏', '护士，三班倒', '胃溃疡', 1),
+('孙明', '13800138010', 'sunm@example.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', 58, '磺胺类过敏', '退休教师', '高血压、高血脂', 0);
 
 -- 插入医生数据（含登录凭证 + 执业信息）
-INSERT INTO doctor (doctorName, username, phone, email, password, cityName, departmentName, hospitalName, introduction) VALUES
+INSERT INTO doctor (doctorName, phone, email, password, cityName, departmentName, hospitalName, introduction) VALUES
 -- 重庆医科大学附属第一医院 内科 (3人)
-('林志远', '林志远', '13900139001', 'linzy@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '内科', '重庆医科大学附属第一医院', '擅长心脑血管疾病诊疗，尤其急性心梗的介入治疗'),
-('刘心怡', '刘心怡', '13900139002', 'liuxy@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '内科', '重庆医科大学附属第一医院', '呼吸系统疾病专家，慢性阻塞性肺病治疗权威'),
-('张博文', '张博文', '13900139003', 'zhangbw@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '内科', '重庆医科大学附属第一医院', '内分泌疾病治疗，糖尿病并发症控制专家'),
+('林志远', '13900139001', 'linzy@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '内科', '重庆医科大学附属第一医院', '擅长心脑血管疾病诊疗，尤其急性心梗的介入治疗'),
+('刘心怡', '13900139002', 'liuxy@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '内科', '重庆医科大学附属第一医院', '呼吸系统疾病专家，慢性阻塞性肺病治疗权威'),
+('张博文', '13900139003', 'zhangbw@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '内科', '重庆医科大学附属第一医院', '内分泌疾病治疗，糖尿病并发症控制专家'),
 
 -- 陆军军医大学西南医院 外科 (3人)
-('李建国', '李建国', '13900139004', 'lijg@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '沙坪坝区', '外科', '陆军军医大学第一附属医院', '微创腹腔镜手术专家，年均手术量300+'),
-('王雅雯', '王雅雯', '13900139005', 'wangyw@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '沙坪坝区', '外科', '陆军军医大学第一附属医院', '肝胆外科权威，复杂肝胆管结石治疗领先'),
-('陈振华', '陈振华', '13900139006', 'chenzh@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '沙坪坝区', '外科', '陆军军医大学第一附属医院', '胃肠肿瘤根治手术专家，五年生存率高于平均水平'),
+('李建国', '13900139004', 'lijg@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '沙坪坝区', '外科', '陆军军医大学第一附属医院', '微创腹腔镜手术专家，年均手术量300+'),
+('王雅雯', '13900139005', 'wangyw@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '沙坪坝区', '外科', '陆军军医大学第一附属医院', '肝胆外科权威，复杂肝胆管结石治疗领先'),
+('陈振华', '13900139006', 'chenzh@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '沙坪坝区', '外科', '陆军军医大学第一附属医院', '胃肠肿瘤根治手术专家，五年生存率高于平均水平'),
 
 -- 重庆市妇幼保健院 妇产科 (3人)
-('周若兰', '周若兰', '13900139007', 'zhourl@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '妇产科', '重庆市妇幼保健院', '高危妊娠管理专家，成功处理子痫前期病例500+'),
-('吴天宇', '吴天宇', '13900139008', 'wuty@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '妇产科', '重庆市妇幼保健院', '妇科肿瘤微创手术，单孔腹腔镜技术领先'),
-('郑浩然', '郑浩然', '13900139009', 'zhenghr@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '妇产科', '重庆市妇幼保健院', '不孕不育诊疗专家，辅助生殖技术成功率85%'),
+('周若兰', '13900139007', 'zhourl@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '妇产科', '重庆市妇幼保健院', '高危妊娠管理专家，成功处理子痫前期病例500+'),
+('吴天宇', '13900139008', 'wuty@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '妇产科', '重庆市妇幼保健院', '妇科肿瘤微创手术，单孔腹腔镜技术领先'),
+('郑浩然', '13900139009', 'zhenghr@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '妇产科', '重庆市妇幼保健院', '不孕不育诊疗专家，辅助生殖技术成功率85%'),
 
 -- 重庆医科大学附属儿童医院 儿科 (3人)
-('孙晓梅', '孙晓梅', '13900139010', 'sunxm@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '儿科', '重庆医科大学附属儿童医院', '新生儿重症监护专家，极低体重儿救治权威'),
-('杨逸飞', '杨逸飞', '13900139011', 'yangyf@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '儿科', '重庆医科大学附属儿童医院', '儿童呼吸系统疾病，哮喘规范化治疗领先'),
-('朱慧琳', '朱慧琳', '13900139012', 'zhuhl@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '儿科', '重庆医科大学附属儿童医院', '小儿神经发育行为疾病诊疗专家'),
+('孙晓梅', '13900139010', 'sunxm@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '儿科', '重庆医科大学附属儿童医院', '新生儿重症监护专家，极低体重儿救治权威'),
+('杨逸飞', '13900139011', 'yangyf@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '儿科', '重庆医科大学附属儿童医院', '儿童呼吸系统疾病，哮喘规范化治疗领先'),
+('朱慧琳', '13900139012', 'zhuhl@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '儿科', '重庆医科大学附属儿童医院', '小儿神经发育行为疾病诊疗专家'),
 
 -- 重庆市中医院 中医科 (3人)
-('徐海峰', '徐海峰', '13900139013', 'xuhf@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '江北区', '中医科', '重庆市中医院', '经方派传人，擅长脾胃病和亚健康调理'),
-('马天翔', '马天翔', '13900139014', 'matx@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '江北区', '中医科', '重庆市中医院', '针灸专家，面瘫和疼痛管理治疗领先'),
-('谢雨欣', '谢雨欣', '13900139015', 'xieyx@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '江北区', '中医科', '重庆市中医院', '妇科疾病中医治疗，不孕症调理成功率高'),
+('徐海峰', '13900139013', 'xuhf@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '江北区', '中医科', '重庆市中医院', '经方派传人，擅长脾胃病和亚健康调理'),
+('马天翔', '13900139014', 'matx@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '江北区', '中医科', '重庆市中医院', '针灸专家，面瘫和疼痛管理治疗领先'),
+('谢雨欣', '13900139015', 'xieyx@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '江北区', '中医科', '重庆市中医院', '妇科疾病中医治疗，不孕症调理成功率高'),
 
 -- 陆军特色医学中心 急诊科 (3人)
-('韩东升', '韩东升', '13900139016', 'hands@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '急诊科', '陆军特色医学中心', '创伤急救专家，多发伤综合救治成功率92%'),
-('董文静', '董文静', '13900139017', 'dongwj@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '急诊科', '陆军特色医学中心', '中毒救治权威，尤其有机磷农药中毒处理'),
-('梁志强', '梁志强', '13900139018', 'liangzq@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '渝中区', '急诊科', '陆军特色医学中心', '心肺复苏专家，ECMO生命支持技术领先'),
+('韩东升', '13900139016', 'hands@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '急诊科', '陆军特色医学中心', '创伤急救专家，多发伤综合救治成功率92%'),
+('董文静', '13900139017', 'dongwj@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '急诊科', '陆军特色医学中心', '中毒救治权威，尤其有机磷农药中毒处理'),
+('梁志强', '13900139018', 'liangzq@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '渝中区', '急诊科', '陆军特色医学中心', '心肺复苏专家，ECMO生命支持技术领先'),
 
 -- 重庆大学附属肿瘤医院 肿瘤科 (2人)
-('高梦瑶', '高梦瑶', '13900139019', 'gaomy@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '沙坪坝区', '肿瘤科', '重庆大学附属肿瘤医院', '肺癌靶向治疗专家，基因检测指导个体化治疗'),
-('黄伟杰', '黄伟杰', '13900139020', 'huangwj@cqhospital.com', 'd0970714757783e6cf17b26fb8e2298f', '沙坪坝区', '肿瘤科', '重庆大学附属肿瘤医院', '消化道肿瘤综合治疗，免疫疗法应用领先');
+('高梦瑶', '13900139019', 'gaomy@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '沙坪坝区', '肿瘤科', '重庆大学附属肿瘤医院', '肺癌靶向治疗专家，基因检测指导个体化治疗'),
+('黄伟杰', '13900139020', 'huangwj@cqhospital.com', '$2a$10$6A0W6A3mIJG.nJW9TIWf/./cKmQLtLDlKw5gwELZVbkT72cbLqBgC', '沙坪坝区', '肿瘤科', '重庆大学附属肿瘤医院', '消化道肿瘤综合治疗，免疫疗法应用领先');
 
 -- 插入病历记录 (20条)
 INSERT INTO record (doctorId, patientId, description, tongue, status, patientName, sex, age, allergiesHistory, habits, oldHistory, phone, score) VALUES

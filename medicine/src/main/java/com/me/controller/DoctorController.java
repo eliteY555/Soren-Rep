@@ -19,34 +19,61 @@ public class DoctorController {
     @Autowired
     private DoctorService doctorService;
 
-    // 医生注册
+    /** 医生注册：BCrypt 哈希 + 手机号跨表查重 */
     @PostMapping("/register")
     public Result register(@RequestBody Doctor doctor) {
+        // 1. 必填校验
+        if (doctor.getPhone() == null || doctor.getPhone().trim().isEmpty()) {
+            return Result.error("手机号不能为空");
+        }
+        if (doctor.getPassword() == null || doctor.getPassword().trim().isEmpty()) {
+            return Result.error("密码不能为空");
+        }
+        if (doctor.getDoctorName() == null || doctor.getDoctorName().trim().isEmpty()) {
+            return Result.error("姓名不能为空");
+        }
+
+        // 2. 跨表查重（doctor + patient）
+        if (doctorService.isPhoneRegistered(doctor.getPhone())) {
+            return Result.error("该手机号已被注册");
+        }
+
+        // 3. BCrypt 哈希
+        doctor.setPassword(PasswordUtil.encode(doctor.getPassword()));
+
+        // 4. 写入
         try {
-            String password = PasswordUtil.desEncrypt(doctor.getPassword());
-            doctor.setPassword(password);
             Doctor saved = doctorService.register(doctor);
+            if (saved != null) saved.setPassword(null);
             return Result.success(saved);
         } catch (DataIntegrityViolationException e) {
-            System.out.println("注册约束冲突: " + e.getMessage());
-            return Result.error("用户名或手机号已存在，或必填字段为空");
+            return Result.error("该手机号已被注册");
         } catch (Exception e) {
             e.printStackTrace();
             return Result.error("注册失败: " + e.getMessage());
         }
     }
 
-    // 医生登录
+    /** 医生登录：BCrypt 验证 */
     @PostMapping("/login")
     public Result login(@RequestBody Map<String, String> loginData) {
         String phone = loginData.get("phone");
-        String password = PasswordUtil.desEncrypt(loginData.get("password"));
-        Doctor doctor = doctorService.login(phone, password);
-        if (doctor != null) {
-            return Result.success(doctor);
-        } else {
+        String password = loginData.get("password");
+
+        if (phone == null || password == null) {
+            return Result.error("手机号和密码不能为空");
+        }
+
+        Doctor doctor = doctorService.findByPhone(phone);
+        if (doctor == null) {
             return Result.error(ResultEnum.USERNAME_OR_PASSWORD_ERROR);
         }
+        if (!PasswordUtil.matches(password, doctor.getPassword())) {
+            return Result.error(ResultEnum.USERNAME_OR_PASSWORD_ERROR);
+        }
+
+        doctor.setPassword(null);
+        return Result.success(doctor);
     }
 
     @PostMapping("/create")
@@ -59,7 +86,6 @@ public class DoctorController {
                 return Result.error("医生信息创建失败");
             }
         } catch (Exception e) {
-            System.out.println("创建医生信息错误: " + e.getMessage());
             e.printStackTrace();
             return Result.error("医生信息创建失败: " + e.getMessage());
         }
@@ -75,7 +101,6 @@ public class DoctorController {
                 return Result.error("更新失败，请稍后再试");
             }
         } catch (Exception e) {
-            System.out.println(e.getMessage());
             return Result.error("更新失败，请稍后再试");
         }
     }
@@ -93,16 +118,15 @@ public class DoctorController {
             }
             return Result.success(doctor);
         } catch (Exception e) {
-            System.out.println("获取医生信息异常，doctorId: " + doctorId);
             e.printStackTrace();
-            return Result.error("查询失败，请稍后再试: " + e.getMessage());
+            return Result.error("查询失败: " + e.getMessage());
         }
     }
 
     @GetMapping
     public Result queryAll() {
-        List<Doctor> doctor = doctorService.queryAll();
-        return Result.success(doctor);
+        List<Doctor> doctors = doctorService.queryAll();
+        return Result.success(doctors);
     }
 
     @PostMapping("/page")

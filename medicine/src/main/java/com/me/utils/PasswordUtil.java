@@ -1,93 +1,39 @@
 package com.me.utils;
 
-import java.util.Base64;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
-
+/**
+ * 密码工具类 — 使用 BCrypt 单向哈希替代 AES 可逆加密
+ */
 public class PasswordUtil {
-    /***
-     * key和iv值可以随机生成
-     */
-    private static String KEY = "Deng200301094060";
 
-    private static String IV = "Deng200301094060";
+    private static final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
-    /***
-     * 加密
-     * @param  data 要加密的数据
-     * @return encrypt
+    /**
+     * 对原始密码进行 BCrypt 哈希（注册/修改密码时调用）
      */
-    public static String encrypt(String data){
-        return encrypt(data, KEY, IV);
-    }
-
-    /***
-     * param data 需要解密的数据
-     * 调用desEncrypt（）方法
-     */
-    public static String desEncrypt(String data){
-        return desEncrypt(data, KEY, IV);
+    public static String encode(String rawPassword) {
+        return encoder.encode(rawPassword);
     }
 
     /**
-     * 加密方法
-     * @param data  要加密的数据
-     * @param key 加密key
-     * @param iv 加密iv
-     * @return 加密的结果
-
+     * 验证原始密码与哈希值是否匹配（登录时调用）
      */
-    private static String encrypt(String data, String key, String iv){
-        try {
-            //"算法/模式/补码方式"NoPadding PkcsPadding
-            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-            int blockSize = cipher.getBlockSize();
-
-            byte[] dataBytes = data.getBytes();
-            int plaintextLength = dataBytes.length;
-            if (plaintextLength % blockSize != 0) {
-                plaintextLength = plaintextLength + (blockSize - (plaintextLength % blockSize));
-            }
-
-            byte[] plaintext = new byte[plaintextLength];
-            System.arraycopy(dataBytes, 0, plaintext, 0, dataBytes.length);
-
-            SecretKeySpec keyspec = new SecretKeySpec(key.getBytes(), "AES");
-            IvParameterSpec ivspec = new IvParameterSpec(iv.getBytes());
-
-            cipher.init(Cipher.ENCRYPT_MODE, keyspec, ivspec);
-            byte[] encrypted = cipher.doFinal(plaintext);
-
-            return Base64.getEncoder().encodeToString(encrypted);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static boolean matches(String rawPassword, String encodedPassword) {
+        return encoder.matches(rawPassword, encodedPassword);
     }
 
     /**
-     * 解密方法
-     * @param data 要解密的数据
-     * @param key  解密key
-     * @param iv 解密iv
-     * @return 解密的结果
+     * 命令行入口：生成 BCrypt 哈希（用于种子数据迁移）
+     * 用法：java -cp ... com.me.utils.PasswordUtil <rawPassword>
      */
-    private static String desEncrypt(String data, String key, String iv){
-        try {
-            byte[] encrypted1 = Base64.getDecoder().decode(data);
-
-            Cipher cipher = Cipher.getInstance("AES/CBC/NoPadding");
-            SecretKeySpec keySpec = new SecretKeySpec(key.getBytes(), "AES");
-            IvParameterSpec ivSpec = new IvParameterSpec(iv.getBytes());
-            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-            byte[] original = cipher.doFinal(encrypted1);
-            return new String(original).trim();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            System.out.println("用法: java com.me.utils.PasswordUtil <原始密码>");
+            System.out.println("示例: java com.me.utils.PasswordUtil 123456");
+            return;
         }
+        System.out.println("原始密码: " + args[0]);
+        System.out.println("BCrypt哈希: " + encode(args[0]));
     }
 }

@@ -1,6 +1,7 @@
 package com.me.service.impl;
 
 import com.me.mapper.DoctorMapper;
+import com.me.mapper.PatientMapper;
 import com.me.pojo.Doctor;
 import com.me.pojo.DoctorDTO;
 import com.me.service.DoctorService;
@@ -15,6 +16,9 @@ import java.util.Map;
 public class DoctorServiceImpl implements DoctorService {
     @Autowired
     private DoctorMapper doctorMapper;
+
+    @Autowired
+    private PatientMapper patientMapper;
 
     @Override
     public int updateDoctorInfo(Doctor doctor) {
@@ -57,22 +61,19 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     @Override
-    public Doctor login(String phone, String password) {
-        return doctorMapper.findByPhoneAndPassword(phone, password);
-    }
-
-    @Override
     public Doctor register(Doctor doctor) {
         doctorMapper.updateDoctorInfo(doctor);
-        Doctor saved = doctorMapper.findByPhone(doctor.getPhone());
-        if (saved != null) {
-            return saved;
-        }
-        return doctor;
+        return doctorMapper.findByPhone(doctor.getPhone());
     }
 
     @Override
     public int updateAccount(Doctor doctor) {
         return doctorMapper.updateAccount(doctor);
+    }
+
+    @Override
+    public boolean isPhoneRegistered(String phone) {
+        return doctorMapper.findByPhone(phone) != null
+                || patientMapper.findByPhone(phone) != null;
     }
 }

@@ -11,9 +11,10 @@ public interface PatientService {
 
     Patient findByPhone(String phone);
 
-    Patient login(String phone, String password);
-
     Patient register(Patient patient);
 
     int updateAccount(Patient patient);
+
+    /** 检查手机号是否已在患者或医生表中注册 */
+    boolean isPhoneRegistered(String phone);
 }

@@ -9,6 +9,7 @@ import dev.langchain4j.rag.content.retriever.ContentRetriever;
 import dev.langchain4j.rag.content.retriever.EmbeddingStoreContentRetriever;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,16 +18,18 @@ public class CommonConfig {
 
     @Autowired
     private MemoryStore memoryStore;
-    @Autowired
+
+    @Autowired(required = false)
     private EmbeddingModel embeddingModel;
-    @Autowired
+
+    @Autowired(required = false)
     private EmbeddingStore<TextSegment> embeddingStore;
 
     /**
      * 会话记忆配置
      */
     @Bean
-    public ChatMemoryProvider MemoryProvider(){
+    public ChatMemoryProvider MemoryProvider() {
         return memoryId ->
                 MessageWindowChatMemory.builder()
                         .id(memoryId)
@@ -36,15 +39,16 @@ public class CommonConfig {
     }
 
     /**
-     * RAG检索增强-向量搜索
+     * RAG 检索增强（仅当 Pinecone EmbeddingStore Bean 存在时创建）
      */
     @Bean
-    ContentRetriever contentRetrieverPinecone(){
+    @ConditionalOnBean(EmbeddingStore.class)
+    ContentRetriever contentRetrieverPinecone() {
         return EmbeddingStoreContentRetriever.builder()
                 .embeddingStore(embeddingStore)
                 .embeddingModel(embeddingModel)
-                .maxResults(1)  //限制返回结果数量，越少精度越高
-                .minScore(0.8)  //相似度阈值
+                .maxResults(5)
+                .minScore(0.65)
                 .build();
     }
 }

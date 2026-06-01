@@ -7,25 +7,26 @@ import dev.langchain4j.store.embedding.pinecone.PineconeEmbeddingStore;
 import dev.langchain4j.store.embedding.pinecone.PineconeServerlessIndexConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- *配置向量数据库
+ * Pinecone 向量数据库（可选）
+ * 仅当 BOTH pinecone.api-key 和 dashscope EmbeddingModel Bean 都可用时才激活。
+ * 开发环境未设置 PINECONE_KEY 或 QWEN_KEY 时自动跳过，AI 对话仍可正常使用。
  */
-
 @Configuration
 public class EmbeddingStoreConfig {
 
-    @Autowired
-    private EmbeddingModel embeddingModel;
-
-    @Value("${pinecone.api-key}")
+    @Value("${pinecone.api-key:#{null}}")
     private String pineconeApiKey;
 
     @Bean
-    public EmbeddingStore<TextSegment> setEmbeddingStore(){
-
+    @ConditionalOnProperty(name = "pinecone.api-key")
+    @ConditionalOnBean(EmbeddingModel.class)
+    public EmbeddingStore<TextSegment> pineconeEmbeddingStore(@Autowired EmbeddingModel embeddingModel) {
         return PineconeEmbeddingStore.builder()
                 .apiKey(pineconeApiKey)
                 .index("medicine-index")
