@@ -7,7 +7,6 @@ com\me\utils\CustomDateDeserializer.class
 com\me\service\impl\RecordServiceImpl.class
 com\me\config\EmbeddingStoreConfig.class
 com\me\service\impl\ReplyServiceImpl.class
-com\me\controller\UserController.class
 com\me\service\impl\PatientServiceImpl.class
 com\me\utils\PasswordUtil.class
 com\me\service\impl\DiagnosticServiceImpl.class
@@ -25,8 +24,6 @@ com\me\assistant\AgentAssistant.class
 com\me\pojo\Patient.class
 com\me\service\RecordService.class
 com\me\pojo\RecordDTO.class
-com\me\service\UserService.class
-com\me\mapper\UserMapper.class
 com\me\controller\DoctorController.class
 com\me\config\JacksonConfig.class
 com\me\service\impl\DoctorServiceImpl.class
@@ -35,6 +32,7 @@ com\me\mapper\ReplyMapper.class
 com\me\pojo\DoctorDTO.class
 com\me\service\ReplyService.class
 com\me\pojo\Reply.class
+com\me\controller\AuthController.class
 com\me\config\LangChainConfig.class
 com\me\pojo\RecordQueryDTO.class
 com\me\pojo\Doctor.class
@@ -47,8 +45,6 @@ com\me\config\CommonConfig.class
 com\me\mapper\CommentMapper.class
 com\me\MedicineApplication.class
 com\me\service\DiagnosticService.class
-com\me\service\impl\UserServiceImpl.class
 com\me\controller\PatientController.class
-com\me\pojo\User.class
 com\me\pojo\Comment.class
 com\me\controller\CommentController.class

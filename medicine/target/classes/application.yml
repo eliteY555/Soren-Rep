@@ -5,9 +5,9 @@ server:
 spring:
   datasource:
     #数据库用户名
-    username: root
+    username: ${DB_USERNAME:root}
     #数据库用户密码
-    password: 2003
+    password: ${DB_PASSWORD:2003}
     #serverTimezone=UTC 解决市区的报错 一般mysql是8.0以上的是必须配置这个
     #userUnicode=true&characterEncoding=utf-8 指定字符编码、解码格式
     url: jdbc:mysql://localhost:3306/medicine?serverTimezone=UTC&userUnicode=true&characterEncoding=utf-8
@@ -18,7 +18,8 @@ spring:
       FAIL_ON_EMPTY_BEANS: false
   data:
     mongodb:
-      uri: mongodb://localhost:27017/chat_memory_db
+      uri: ${MONGODB_URI:mongodb://localhost:27017/chat_memory_db}
+      auto-index-creation: true
   # Hibernate 配置
   jpa:
     hibernate:
@@ -32,20 +33,25 @@ mybatis:
   mapper-locations: classpath:mapper/*.xml
 
 langchain4j:
+  open-ai:
+    chat-model:
+      base-url: https://api.deepseek.com/v1
+      api-key: ${DEEPSEEK_KEY}
+      model-name: deepseek-v4-pro
+    streaming-chat-model:
+      base-url: https://api.deepseek.com/v1
+      api-key: ${DEEPSEEK_KEY}
+      model-name: deepseek-v4-pro
   community:
     dashscope:
-      chat-model:
-        api-key: ${QWEN_KEY}
-        model-name: qwen-max
-      streaming-chat-model:
-        api-key: ${QWEN_KEY}
-        model-name: qwen-max
       embedding-model:
         model-name: text-embedding-v3
-        api-key: ${QWEN_KEY}
+        api-key: ${QWEN_KEY:#{null}}
 
 pinecone:
-  api-key: ${PINECONE_KEY}
+  api-key: ${PINECONE_KEY:#{null}}
 logging:
   level:
     root: info
+    com.me: debug
+    dev.langchain4j: debug

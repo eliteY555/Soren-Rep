@@ -1,0 +1,29 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <pattern id="geometricPattern" patternUnits="userSpaceOnUse" width="50" height="50">
+      <!-- 基本几何单元 -->
+      <rect x="0" y="0" width="50" height="50" fill="none" stroke="#8b6f4e" stroke-width="0.5" opacity="0.1" />
+      
+      <!-- 中心图案 -->
+      <rect x="15" y="15" width="20" height="20" fill="none" stroke="#8b6f4e" stroke-width="0.5" opacity="0.2" />
+      <rect x="20" y="20" width="10" height="10" fill="#b87c5a" opacity="0.1" />
+      
+      <!-- 角落装饰 -->
+      <path d="M0,0 L10,10 M0,10 L10,0" stroke="#8b6f4e" stroke-width="0.5" opacity="0.15" />
+      <path d="M40,0 L50,10 M40,10 L50,0" stroke="#8b6f4e" stroke-width="0.5" opacity="0.15" />
+      <path d="M0,40 L10,50 M0,50 L10,40" stroke="#8b6f4e" stroke-width="0.5" opacity="0.15" />
+      <path d="M40,40 L50,50 M40,50 L50,40" stroke="#8b6f4e" stroke-width="0.5" opacity="0.15" />
+      
+      <!-- 边缘装饰 -->
+      <circle cx="25" cy="5" r="2" fill="#d2a760" opacity="0.2" />
+      <circle cx="5" cy="25" r="2" fill="#d2a760" opacity="0.2" />
+      <circle cx="45" cy="25" r="2" fill="#d2a760" opacity="0.2" />
+      <circle cx="25" cy="45" r="2" fill="#d2a760" opacity="0.2" />
+      
+      <!-- 连接线 -->
+      <path d="M25,5 L25,15 M5,25 L15,25 M35,25 L45,25 M25,35 L25,45" 
+            stroke="#8b6f4e" stroke-width="0.5" stroke-dasharray="2,2" opacity="0.1" />
+    </pattern>
+  </defs>
+  <rect width="200" height="200" fill="url(#geometricPattern)" />
+</svg> 
